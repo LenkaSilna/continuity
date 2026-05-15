@@ -29,7 +29,7 @@ observations, with AI-assisted analysis. Linear: [LEN-101](https://linear.app/le
    Required variables:
 
    | Var | Where to find it |
-   |---|---|
+   | --- | --- |
    | `NEXT_PUBLIC_SUPABASE_URL` | Supabase Dashboard → **Settings → API** → Project URL |
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard → **Settings → API** → `anon` `public` key |
    | `ALLOWED_EMAILS` | Comma-separated emails allowed to sign in. **Empty = open to everyone (dev only).** |
@@ -113,7 +113,7 @@ app/icon.png, app/apple-icon.png, app/favicon.ico  ← favicons (auto-served by 
 See `supabase/migrations/0001_initial_schema.sql` for the source of truth.
 
 | Table | Purpose |
-|---|---|
+| --- | --- |
 | `profile` | 1 row per user — name, DOB, gender, skin_types[] |
 | `product_types` | user-managed list of skincare categories (cleanser, serum, …) |
 | `products` | skincare library — references `product_types` |
