@@ -1,0 +1,82 @@
+export type Gender = "female" | "male" | "prefer-not-to-say";
+export type TimeOfDay = "morning" | "afternoon" | "evening";
+export type ItemKind = "product" | "supplement" | "habit";
+
+export type Profile = {
+  user_id: string;
+  name: string | null;
+  date_of_birth: string | null;
+  gender: Gender | null;
+  skin_types: string[];
+  created_at: string;
+  updated_at: string;
+};
+
+export type ProductType = {
+  id: string;
+  user_id: string;
+  name: string;
+  position: number;
+  created_at: string;
+};
+
+export type Product = {
+  id: string;
+  user_id: string;
+  name: string;
+  brand: string | null;
+  type_id: string | null;
+  active_ingredients: string | null;
+  inci: string | null;
+  notes: string | null;
+  is_active: boolean;
+  created_at: string;
+};
+
+export type Supplement = {
+  id: string;
+  user_id: string;
+  name: string;
+  brand: string | null;
+  dosage: string | null;
+  purpose: string | null;
+  notes: string | null;
+  is_active: boolean;
+  created_at: string;
+};
+
+export type Habit = {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  is_active: boolean;
+  created_at: string;
+};
+
+export type RoutineItem = {
+  id: string;
+  user_id: string;
+  time_of_day: TimeOfDay;
+  item_kind: ItemKind;
+  product_id: string | null;
+  supplement_id: string | null;
+  habit_id: string | null;
+  position: number;
+  created_at: string;
+};
+
+export type DailyLog = {
+  user_id: string;
+  log_date: string;
+  routine_item_id: string;
+  done_at: string;
+};
+
+export type DailyNote = {
+  user_id: string;
+  log_date: string;
+  mood: number | null;
+  notes: string | null;
+  updated_at: string;
+};
