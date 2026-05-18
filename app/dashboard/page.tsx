@@ -5,17 +5,6 @@ import { getMessages } from "@/lib/i18n/server";
 import type { Profile } from "@/lib/types";
 import { TopNav } from "../_components/top-nav";
 
-function calcAge(dob: string | null): number | null {
-  if (!dob) return null;
-  const birth = new Date(dob);
-  if (Number.isNaN(birth.getTime())) return null;
-  const now = new Date();
-  let age = now.getFullYear() - birth.getFullYear();
-  const m = now.getMonth() - birth.getMonth();
-  if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age--;
-  return age;
-}
-
 export default async function DashboardPage() {
   const supabase = await createServerSupabaseClient();
   const {
@@ -40,9 +29,24 @@ export default async function DashboardPage() {
     <form action="/auth/signout" method="post">
       <button
         type="submit"
-        className="min-h-[32px] rounded-md border border-zinc-300 px-3 text-xs hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900"
+        aria-label={t.common.signOut}
+        title={t.common.signOut}
+        className="grid h-9 w-9 place-items-center rounded-md border border-zinc-300 text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
       >
-        {t.common.signOut}
+        <svg
+          viewBox="0 0 24 24"
+          className="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
       </button>
     </form>
   );
@@ -79,50 +83,23 @@ export default async function DashboardPage() {
           </section>
         ) : profile ? (
           <>
-            <section className="space-y-3 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
-              <div className="flex items-start justify-between gap-3">
+            <section className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
+              <div className="min-w-0 space-y-1">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
                   {t.dashboard.aboutMe}
                 </h2>
-                <Link
-                  href="/profile"
-                  className="text-xs text-zinc-600 underline hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-                >
-                  {t.common.edit}
-                </Link>
-              </div>
-              <dl className="grid gap-y-2 text-sm sm:grid-cols-[140px_1fr]">
-                <dt className="text-zinc-500">{t.dashboard.fields.name}</dt>
-                <dd>
+                <p className="truncate text-lg font-medium">
                   {profile.name || (
                     <span className="text-zinc-400">{t.dashboard.empty}</span>
                   )}
-                </dd>
-                <dt className="text-zinc-500">{t.dashboard.fields.age}</dt>
-                <dd>
-                  {calcAge(profile.date_of_birth) ?? (
-                    <span className="text-zinc-400">{t.dashboard.empty}</span>
-                  )}
-                </dd>
-                <dt className="text-zinc-500">{t.dashboard.fields.gender}</dt>
-                <dd>
-                  {profile.gender ? (
-                    t.genders[profile.gender]
-                  ) : (
-                    <span className="text-zinc-400">{t.dashboard.empty}</span>
-                  )}
-                </dd>
-                <dt className="text-zinc-500">{t.dashboard.fields.skinTypes}</dt>
-                <dd>
-                  {profile.skin_types.length > 0 ? (
-                    profile.skin_types
-                      .map((s) => t.skinTypes[s as keyof typeof t.skinTypes] ?? s)
-                      .join(", ")
-                  ) : (
-                    <span className="text-zinc-400">{t.dashboard.empty}</span>
-                  )}
-                </dd>
-              </dl>
+                </p>
+              </div>
+              <Link
+                href="/profile"
+                className="inline-flex h-9 shrink-0 items-center rounded-md border border-zinc-300 px-3 text-sm text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+              >
+                {t.common.edit}
+              </Link>
             </section>
 
             <section className="rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
@@ -135,13 +112,29 @@ export default async function DashboardPage() {
                   →{" "}
                   <Link
                     href="/library/products"
-                    className="underline underline-offset-2 hover:text-zinc-900 dark:hover:text-zinc-100"
+                    className="-mx-1 inline-flex min-h-[32px] items-center rounded px-1 underline underline-offset-2 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
                   >
                     {t.dashboard.sections.products}
                   </Link>
                 </li>
-                <li>○ {t.dashboard.sections.supplements}</li>
-                <li>○ {t.dashboard.sections.habits}</li>
+                <li>
+                  →{" "}
+                  <Link
+                    href="/library/supplements"
+                    className="-mx-1 inline-flex min-h-[32px] items-center rounded px-1 underline underline-offset-2 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                  >
+                    {t.dashboard.sections.supplements}
+                  </Link>
+                </li>
+                <li>
+                  →{" "}
+                  <Link
+                    href="/library/habits"
+                    className="-mx-1 inline-flex min-h-[32px] items-center rounded px-1 underline underline-offset-2 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                  >
+                    {t.dashboard.sections.habits}
+                  </Link>
+                </li>
                 <li>○ {t.dashboard.sections.routine}</li>
                 <li>○ {t.dashboard.sections.calendar}</li>
                 <li>○ {t.dashboard.sections.ai}</li>

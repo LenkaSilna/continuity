@@ -4,44 +4,49 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useId, useTransition } from "react";
 import {
-  deleteProduct,
-  updateProduct,
+  deleteSupplement,
+  updateSupplement,
   type ActionState,
 } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
-import type { Product, ProductBrand, ProductType } from "@/lib/types";
+import type { Supplement, SupplementBrand, SupplementType } from "@/lib/types";
 
 const initialState: ActionState = {};
 
-export function EditProductForm({
-  product,
+export function EditSupplementForm({
+  supplement,
   types,
   brands,
 }: {
-  product: Product;
-  types: ProductType[];
-  brands: ProductBrand[];
+  supplement: Supplement;
+  types: SupplementType[];
+  brands: SupplementBrand[];
 }) {
   const { t } = useI18n();
   const router = useRouter();
-  const boundUpdate = updateProduct.bind(null, product.id);
-  const [state, formAction, isPending] = useActionState(boundUpdate, initialState);
+  const boundUpdate = updateSupplement.bind(null, supplement.id);
+  const [state, formAction, isPending] = useActionState(
+    boundUpdate,
+    initialState,
+  );
   const [isDeleting, startDelete] = useTransition();
   const brandListId = useId();
   const currentBrandName =
-    brands.find((b) => b.id === product.brand_id)?.name ?? "";
+    brands.find((b) => b.id === supplement.brand_id)?.name ?? "";
 
   useEffect(() => {
     if (state.ok) {
-      router.push("/library/products");
+      router.push("/library/supplements");
       router.refresh();
     }
   }, [state.ok, router]);
 
   const errorMessage = (() => {
-    if (state.errorCode === "name_required") return t.library.products.errors.nameRequired;
-    if (state.errorCode === "generic") return state.errorDetail ?? t.library.products.errors.generic;
+    if (state.errorCode === "name_required")
+      return t.library.supplements.errors.nameRequired;
+    if (state.errorCode === "generic")
+      return state.errorDetail ?? t.library.supplements.errors.generic;
     return null;
   })();
 
@@ -49,25 +54,27 @@ export function EditProductForm({
     <form action={formAction} className="space-y-4">
       <label className="block space-y-1">
         <span className="text-xs font-medium">
-          {t.library.products.form.name} {t.common.requiredField}
+          {t.library.supplements.form.name} {t.common.requiredField}
         </span>
         <input
           name="name"
           required
-          defaultValue={product.name}
-          placeholder={t.library.products.form.namePlaceholder}
+          defaultValue={supplement.name}
+          placeholder={t.library.supplements.form.namePlaceholder}
           className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
         />
       </label>
 
       <label className="block space-y-1">
-        <span className="text-xs font-medium">{t.library.products.form.brand}</span>
+        <span className="text-xs font-medium">
+          {t.library.supplements.form.brand}
+        </span>
         <input
           name="brand"
           list={brandListId}
           autoComplete="off"
           defaultValue={currentBrandName}
-          placeholder={t.library.products.form.brandPlaceholder}
+          placeholder={t.library.supplements.form.brandPlaceholder}
           className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
         />
         <datalist id={brandListId}>
@@ -78,13 +85,15 @@ export function EditProductForm({
       </label>
 
       <label className="block space-y-1">
-        <span className="text-xs font-medium">{t.library.products.form.type}</span>
+        <span className="text-xs font-medium">
+          {t.library.supplements.form.type}
+        </span>
         <select
           name="type_id"
-          defaultValue={product.type_id ?? ""}
+          defaultValue={supplement.type_id ?? ""}
           className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
         >
-          <option value="">{t.library.products.form.typeNone}</option>
+          <option value="">{t.library.supplements.form.typeNone}</option>
           {types.map((type) => (
             <option key={type.id} value={type.id}>
               {type.name}
@@ -95,37 +104,53 @@ export function EditProductForm({
 
       <label className="block space-y-1">
         <span className="text-xs font-medium">
-          {t.library.products.form.activeIngredients}
+          {t.library.supplements.form.dosage}
         </span>
         <input
-          name="active_ingredients"
-          defaultValue={product.active_ingredients ?? ""}
-          placeholder={t.library.products.form.activeIngredientsPlaceholder}
+          name="dosage"
+          defaultValue={supplement.dosage ?? ""}
+          placeholder={t.library.supplements.form.dosagePlaceholder}
           className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
         />
       </label>
 
       <label className="block space-y-1">
-        <span className="text-xs font-medium">{t.library.products.form.inci}</span>
+        <span className="text-xs font-medium">
+          {t.library.supplements.form.purpose}
+        </span>
+        <input
+          name="purpose"
+          defaultValue={supplement.purpose ?? ""}
+          placeholder={t.library.supplements.form.purposePlaceholder}
+          className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+        />
+      </label>
+
+      <label className="block space-y-1">
+        <span className="text-xs font-medium">
+          {t.library.supplements.form.ingredients}
+        </span>
         <span className="block text-xs text-zinc-500">
-          {t.library.products.form.inciHint}
+          {t.library.supplements.form.ingredientsHint}
         </span>
         <textarea
-          name="inci"
+          name="ingredients"
           rows={4}
-          defaultValue={product.inci ?? ""}
-          placeholder={t.library.products.form.inciPlaceholder}
+          defaultValue={supplement.ingredients ?? ""}
+          placeholder={t.library.supplements.form.ingredientsPlaceholder}
           className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 font-mono text-xs dark:border-zinc-700 dark:bg-zinc-900"
         />
       </label>
 
       <label className="block space-y-1">
-        <span className="text-xs font-medium">{t.library.products.form.notes}</span>
+        <span className="text-xs font-medium">
+          {t.library.supplements.form.notes}
+        </span>
         <textarea
           name="notes"
           rows={2}
-          defaultValue={product.notes ?? ""}
-          placeholder={t.library.products.form.notesPlaceholder}
+          defaultValue={supplement.notes ?? ""}
+          placeholder={t.library.supplements.form.notesPlaceholder}
           className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
         />
       </label>
@@ -140,10 +165,10 @@ export function EditProductForm({
             {isPending ? t.common.saving : t.common.save}
           </button>
           <Link
-            href="/library/products"
+            href="/library/supplements"
             className="rounded-md border border-zinc-300 px-4 py-2.5 text-sm dark:border-zinc-700"
           >
-            {t.library.products.cancel}
+            {t.library.supplements.cancel}
           </Link>
         </div>
         <button
@@ -151,13 +176,13 @@ export function EditProductForm({
           disabled={isDeleting}
           onClick={() => {
             confirmToast({
-              message: t.library.products.card.confirmDelete,
+              message: t.library.supplements.card.confirmDelete,
               confirmLabel: t.common.delete,
               cancelLabel: t.common.cancel,
               onConfirm: () =>
                 startDelete(async () => {
-                  await deleteProduct(product.id);
-                  router.push("/library/products");
+                  await deleteSupplement(supplement.id);
+                  router.push("/library/supplements");
                   router.refresh();
                 }),
             });

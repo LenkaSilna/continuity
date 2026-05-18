@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 import { I18nProvider } from "@/lib/i18n/client";
 import { getLocale, getMessages } from "@/lib/i18n/server";
@@ -49,6 +50,13 @@ export default async function RootLayout({
       <body className="flex min-h-full flex-col safe-bottom">
         <I18nProvider locale={locale} messages={messages}>
           {children}
+          <Toaster
+            position="top-center"
+            closeButton
+            richColors
+            theme="system"
+            toastOptions={{ duration: 6000 }}
+          />
         </I18nProvider>
       </body>
     </html>

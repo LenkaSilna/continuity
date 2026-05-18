@@ -2,32 +2,32 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getMessages } from "@/lib/i18n/server";
-import type { Product, ProductBrand, ProductType } from "@/lib/types";
+import type { Supplement, SupplementBrand, SupplementType } from "@/lib/types";
 import { TopNav } from "../../_components/top-nav";
-import { ProductTypesSection } from "./_components/product-types-section";
-import { ProductBrandsSection } from "./_components/product-brands-section";
-import { AddProductForm } from "./_components/add-product-form";
-import { ProductsList } from "./_components/products-list";
+import { SupplementTypesSection } from "./_components/supplement-types-section";
+import { SupplementBrandsSection } from "./_components/supplement-brands-section";
+import { AddSupplementForm } from "./_components/add-supplement-form";
+import { SupplementsList } from "./_components/supplements-list";
 
-export default async function ProductsLibraryPage() {
+export default async function SupplementsLibraryPage() {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
-  const [{ data: types }, { data: brands }, { data: products }] =
+  const [{ data: types }, { data: brands }, { data: supplements }] =
     await Promise.all([
       supabase
-        .from("product_types")
+        .from("supplement_types")
         .select("*")
         .order("position", { ascending: true }),
       supabase
-        .from("product_brands")
+        .from("supplement_brands")
         .select("*")
         .order("name", { ascending: true }),
       supabase
-        .from("products")
+        .from("supplements")
         .select("*")
         .order("created_at", { ascending: false }),
     ]);
@@ -46,26 +46,28 @@ export default async function ProductsLibraryPage() {
             ← {t.common.backToDashboard}
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">
-            {t.library.products.title}
+            {t.library.supplements.title}
           </h1>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            {t.library.products.subtitle}
+            {t.library.supplements.subtitle}
           </p>
         </header>
 
-        <ProductTypesSection types={(types ?? []) as ProductType[]} />
+        <SupplementTypesSection types={(types ?? []) as SupplementType[]} />
 
-        <ProductBrandsSection brands={(brands ?? []) as ProductBrand[]} />
-
-        <AddProductForm
-          types={(types ?? []) as ProductType[]}
-          brands={(brands ?? []) as ProductBrand[]}
+        <SupplementBrandsSection
+          brands={(brands ?? []) as SupplementBrand[]}
         />
 
-        <ProductsList
-          products={(products ?? []) as Product[]}
-          types={(types ?? []) as ProductType[]}
-          brands={(brands ?? []) as ProductBrand[]}
+        <AddSupplementForm
+          types={(types ?? []) as SupplementType[]}
+          brands={(brands ?? []) as SupplementBrand[]}
+        />
+
+        <SupplementsList
+          supplements={(supplements ?? []) as Supplement[]}
+          types={(types ?? []) as SupplementType[]}
+          brands={(brands ?? []) as SupplementBrand[]}
         />
       </main>
     </>

@@ -2,26 +2,32 @@
 
 import { useActionState, useState, useTransition } from "react";
 import {
-  addProductType,
-  deleteProductType,
+  addSupplementType,
+  deleteSupplementType,
   type ActionState,
 } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
-import type { ProductType } from "@/lib/types";
+import type { SupplementType } from "@/lib/types";
 
 const initialState: ActionState = {};
 
-export function ProductTypesSection({ types }: { types: ProductType[] }) {
+export function SupplementTypesSection({ types }: { types: SupplementType[] }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(types.length === 0);
-  const [state, formAction, isPending] = useActionState(addProductType, initialState);
+  const [state, formAction, isPending] = useActionState(
+    addSupplementType,
+    initialState,
+  );
   const [deletingId, startDelete] = useTransition();
 
   const errorMessage = (() => {
-    if (state.errorCode === "name_required") return t.library.products.errors.nameRequired;
-    if (state.errorCode === "type_exists") return t.library.products.errors.typeExists;
-    if (state.errorCode === "generic") return state.errorDetail ?? t.library.products.errors.generic;
+    if (state.errorCode === "name_required")
+      return t.library.supplements.errors.nameRequired;
+    if (state.errorCode === "type_exists")
+      return t.library.supplements.errors.typeExists;
+    if (state.errorCode === "generic")
+      return state.errorDetail ?? t.library.supplements.errors.generic;
     return null;
   })();
 
@@ -34,10 +40,10 @@ export function ProductTypesSection({ types }: { types: ProductType[] }) {
       >
         <div>
           <h2 className="text-sm font-semibold uppercase tracking-wide">
-            {t.library.products.types.title}
+            {t.library.supplements.types.title}
           </h2>
           <p className="mt-0.5 text-xs text-zinc-500">
-            {types.length} · {t.library.products.types.subtitle}
+            {types.length} · {t.library.supplements.types.subtitle}
           </p>
         </div>
         <span className="text-xl text-zinc-400" aria-hidden>
@@ -48,7 +54,9 @@ export function ProductTypesSection({ types }: { types: ProductType[] }) {
       {open && (
         <div className="space-y-3 border-t border-zinc-200 p-4 dark:border-zinc-800">
           {types.length === 0 ? (
-            <p className="text-sm text-zinc-500">{t.library.products.types.empty}</p>
+            <p className="text-sm text-zinc-500">
+              {t.library.supplements.types.empty}
+            </p>
           ) : (
             <ul className="flex flex-wrap gap-2">
               {types.map((type) => (
@@ -63,11 +71,11 @@ export function ProductTypesSection({ types }: { types: ProductType[] }) {
                     disabled={deletingId}
                     onClick={() => {
                       confirmToast({
-                        message: t.library.products.types.confirmDelete,
+                        message: t.library.supplements.types.confirmDelete,
                         confirmLabel: t.common.delete,
                         cancelLabel: t.common.cancel,
                         onConfirm: () =>
-                          startDelete(() => deleteProductType(type.id)),
+                          startDelete(() => deleteSupplementType(type.id)),
                       });
                     }}
                     className="grid h-7 w-7 place-items-center rounded-full text-base leading-none text-zinc-500 transition hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
@@ -83,7 +91,7 @@ export function ProductTypesSection({ types }: { types: ProductType[] }) {
             <input
               name="name"
               required
-              placeholder={t.library.products.types.addPlaceholder}
+              placeholder={t.library.supplements.types.addPlaceholder}
               className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
             />
             <button
@@ -91,12 +99,14 @@ export function ProductTypesSection({ types }: { types: ProductType[] }) {
               disabled={isPending}
               className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-50 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
             >
-              {t.library.products.types.add}
+              {t.library.supplements.types.add}
             </button>
           </form>
 
           {errorMessage && (
-            <p className="text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
+            <p className="text-sm text-red-600 dark:text-red-400">
+              {errorMessage}
+            </p>
           )}
         </div>
       )}

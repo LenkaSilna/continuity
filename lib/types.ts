@@ -20,11 +20,18 @@ export type ProductType = {
   created_at: string;
 };
 
+export type ProductBrand = {
+  id: string;
+  user_id: string;
+  name: string;
+  created_at: string;
+};
+
 export type Product = {
   id: string;
   user_id: string;
   name: string;
-  brand: string | null;
+  brand_id: string | null;
   type_id: string | null;
   active_ingredients: string | null;
   inci: string | null;
@@ -33,13 +40,30 @@ export type Product = {
   created_at: string;
 };
 
+export type SupplementType = {
+  id: string;
+  user_id: string;
+  name: string;
+  position: number;
+  created_at: string;
+};
+
+export type SupplementBrand = {
+  id: string;
+  user_id: string;
+  name: string;
+  created_at: string;
+};
+
 export type Supplement = {
   id: string;
   user_id: string;
   name: string;
-  brand: string | null;
+  brand_id: string | null;
+  type_id: string | null;
   dosage: string | null;
   purpose: string | null;
+  ingredients: string | null;
   notes: string | null;
   is_active: boolean;
   created_at: string;

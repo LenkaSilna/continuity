@@ -120,7 +120,7 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
         {!isFirstFill && (
           <Link
             href="/dashboard"
-            className="text-center text-sm text-zinc-600 underline hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            className="inline-flex h-11 items-center justify-center rounded-md px-3 text-sm text-zinc-600 underline transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
           >
             {t.common.backToDashboard}
           </Link>
