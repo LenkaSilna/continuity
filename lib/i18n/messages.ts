@@ -36,6 +36,10 @@ const cs = {
       exchange_failed: "Odkaz vypršel nebo už byl použit. Pošli si nový.",
     },
   },
+  openSource: {
+    body: "Continuity je open source — stáhni si projekt z GitHubu, postupuj podle README a za chvíli běží jenom pro tebe, na tvých datech. Nápady na vylepšení nebo dotazy mi pošli přes GitHub.",
+    github: "Zobrazit na GitHubu",
+  },
   profile: {
     title: "O mně",
     subtitle: "Osobní kontext pro generátor AI promptu. Můžeš kdykoli upravit.",
@@ -170,6 +174,10 @@ const en: Messages = {
       missing_code: "Verification code is missing. Click the link in your email again.",
       exchange_failed: "The link has expired or was already used. Request a new one.",
     },
+  },
+  openSource: {
+    body: "Continuity is open source — clone it from GitHub, follow the README, and in a few minutes you'll have your own instance running on your own data. Got an idea or question? Reach out via GitHub.",
+    github: "View on GitHub",
   },
   profile: {
     title: "About me",
