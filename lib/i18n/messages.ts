@@ -203,6 +203,47 @@ const cs = {
       },
     },
   },
+  routine: {
+    title: "Rutiny",
+    subtitle: "Co děláš ráno, odpoledne a večer. Vyber z knihovny.",
+    slots: {
+      morning: "Ráno",
+      afternoon: "Odpoledne",
+      evening: "Večer",
+    },
+    sections: {
+      products: "Kosmetika",
+      supplements: "Doplňky",
+      habits: "Návyky",
+    },
+    empty: {
+      products: "Žádná kosmetika v tomto slotu.",
+      supplements: "Žádné doplňky v tomto slotu.",
+      habits: "Žádné návyky v tomto slotu.",
+    },
+    libraryEmpty: {
+      products: "Knihovna kosmetiky je prázdná.",
+      supplements: "Knihovna doplňků je prázdná.",
+      habits: "Knihovna návyků je prázdná.",
+    },
+    libraryEmptyLink: "Přidat do knihovny →",
+    add: {
+      products: "+ kosmetika",
+      supplements: "+ doplněk",
+      habits: "+ návyk",
+    },
+    picker: {
+      title: "Vyber položku",
+      allAdded: "Vše už je v tomto slotu.",
+      cancel: "Zavřít",
+    },
+    card: {
+      confirmRemove: "Odebrat z rutiny?",
+    },
+    errors: {
+      generic: "Něco se pokazilo.",
+    },
+  },
   dbError: {
     notInitialised: "Databáze není inicializovaná",
     runMigration: "Spusť",
@@ -426,6 +467,47 @@ const en: Messages = {
         nameRequired: "Name is required.",
         generic: "Something went wrong.",
       },
+    },
+  },
+  routine: {
+    title: "Routines",
+    subtitle: "What you do morning, afternoon, and evening. Pick from your library.",
+    slots: {
+      morning: "Morning",
+      afternoon: "Afternoon",
+      evening: "Evening",
+    },
+    sections: {
+      products: "Skincare",
+      supplements: "Supplements",
+      habits: "Habits",
+    },
+    empty: {
+      products: "No skincare in this slot.",
+      supplements: "No supplements in this slot.",
+      habits: "No habits in this slot.",
+    },
+    libraryEmpty: {
+      products: "Skincare library is empty.",
+      supplements: "Supplements library is empty.",
+      habits: "Habits library is empty.",
+    },
+    libraryEmptyLink: "Add to library →",
+    add: {
+      products: "+ skincare",
+      supplements: "+ supplement",
+      habits: "+ habit",
+    },
+    picker: {
+      title: "Pick an item",
+      allAdded: "Everything is already in this slot.",
+      cancel: "Close",
+    },
+    card: {
+      confirmRemove: "Remove from routine?",
+    },
+    errors: {
+      generic: "Something went wrong.",
     },
   },
   dbError: {

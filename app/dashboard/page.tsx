@@ -135,7 +135,15 @@ export default async function DashboardPage() {
                     {t.dashboard.sections.habits}
                   </Link>
                 </li>
-                <li>○ {t.dashboard.sections.routine}</li>
+                <li>
+                  →{" "}
+                  <Link
+                    href="/routine"
+                    className="-mx-1 inline-flex min-h-[32px] items-center rounded px-1 underline underline-offset-2 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                  >
+                    {t.dashboard.sections.routine}
+                  </Link>
+                </li>
                 <li>○ {t.dashboard.sections.calendar}</li>
                 <li>○ {t.dashboard.sections.ai}</li>
               </ul>
