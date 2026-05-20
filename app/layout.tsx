@@ -75,7 +75,11 @@ export default async function RootLayout({
       lang={locale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased ${theme === "dark" ? "dark" : ""}`}
     >
-      <body className="flex min-h-full flex-col safe-bottom" style={bodyStyle}>
+      <body
+        className="flex min-h-full flex-col safe-bottom"
+        style={bodyStyle}
+        suppressHydrationWarning
+      >
         <I18nProvider locale={locale} messages={messages}>
           {children}
           <Toaster
