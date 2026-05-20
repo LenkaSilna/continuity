@@ -1,11 +1,17 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 import { saveProfile, type ProfileFormState } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { GENDERS, SKIN_TYPES } from "@/lib/skin-types";
-import type { Profile } from "@/lib/types";
+import type { Lifestyle, Profile } from "@/lib/types";
+
+const LIFESTYLES: readonly Lifestyle[] = [
+  "sedentary",
+  "light",
+  "active",
+  "very_active",
+];
 
 const initialState: ProfileFormState = {};
 
@@ -24,8 +30,28 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
   const { t } = useI18n();
   const [state, formAction, isPending] = useActionState(saveProfile, initialState);
   const [dob, setDob] = useState(profile?.date_of_birth ?? "");
+  const [skinTypes, setSkinTypes] = useState<string[]>(
+    profile?.skin_types ?? [],
+  );
+  const [newSkinType, setNewSkinType] = useState("");
   const age = calcAge(dob);
   const isFirstFill = !profile;
+
+  const toggleSkinType = (s: string) => {
+    setSkinTypes((prev) =>
+      prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s],
+    );
+  };
+
+  const addCustomSkinType = () => {
+    const v = newSkinType.trim().slice(0, 40);
+    if (!v) return;
+    setSkinTypes((prev) => (prev.includes(v) ? prev : [...prev, v]));
+    setNewSkinType("");
+  };
+
+  const presetSet = new Set<string>(SKIN_TYPES);
+  const customSkinTypes = skinTypes.filter((s) => !presetSet.has(s));
 
   useEffect(() => {
     if (state.ok && isFirstFill) {
@@ -90,41 +116,121 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
           {t.profile.skinTypes}{" "}
           <span className="text-zinc-500">{t.profile.skinTypesHint}</span>
         </legend>
+
+        {/* Hidden inputs are the source of truth for form submission. */}
+        {skinTypes.map((s) => (
+          <input
+            key={`hidden-${s}`}
+            type="hidden"
+            name="skin_types"
+            value={s}
+          />
+        ))}
+
         <div className="grid gap-2 sm:grid-cols-2">
-          {SKIN_TYPES.map((skin) => (
+          {SKIN_TYPES.map((skin) => {
+            const active = skinTypes.includes(skin);
+            return (
+              <button
+                key={skin}
+                type="button"
+                aria-pressed={active}
+                onClick={() => toggleSkinType(skin)}
+                className={[
+                  "flex min-h-[44px] cursor-pointer items-center justify-center rounded-full border px-4 py-2 text-sm transition",
+                  active
+                    ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+                    : "border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900",
+                ].join(" ")}
+              >
+                {t.skinTypes[skin]}
+              </button>
+            );
+          })}
+          {customSkinTypes.map((s) => (
+            <button
+              key={s}
+              type="button"
+              aria-pressed
+              aria-label={`${t.profile.skinTypesCustom.removeLabel} ${s}`}
+              onClick={() => toggleSkinType(s)}
+              className="flex min-h-[44px] cursor-pointer items-center justify-center gap-1.5 rounded-full border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm text-zinc-50 transition dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+            >
+              {s}
+              <span aria-hidden className="opacity-60">
+                ×
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="flex gap-2 pt-1">
+          <input
+            type="text"
+            value={newSkinType}
+            onChange={(e) => setNewSkinType(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                addCustomSkinType();
+              }
+            }}
+            placeholder={t.profile.skinTypesCustom.placeholder}
+            className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          />
+          <button
+            type="button"
+            onClick={addCustomSkinType}
+            disabled={!newSkinType.trim()}
+            className="rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+          >
+            {t.profile.skinTypesCustom.add}
+          </button>
+        </div>
+      </fieldset>
+
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-medium">{t.profile.lifestyle}</legend>
+        <p className="text-xs text-zinc-500">{t.profile.lifestyleHint}</p>
+        <div className="flex flex-wrap gap-2">
+          {LIFESTYLES.map((l) => (
             <label
-              key={skin}
+              key={l}
               className="flex cursor-pointer items-center gap-2 rounded-full border border-zinc-300 px-4 py-2 text-sm has-[input:checked]:border-zinc-900 has-[input:checked]:bg-zinc-900 has-[input:checked]:text-zinc-50 dark:border-zinc-700 dark:has-[input:checked]:border-zinc-100 dark:has-[input:checked]:bg-zinc-100 dark:has-[input:checked]:text-zinc-900"
             >
               <input
-                type="checkbox"
-                name="skin_types"
-                value={skin}
-                defaultChecked={profile?.skin_types?.includes(skin) ?? false}
+                type="radio"
+                name="lifestyle"
+                value={l}
+                defaultChecked={(profile?.lifestyle ?? "sedentary") === l}
                 className="sr-only"
               />
-              {t.skinTypes[skin]}
+              {t.profile.lifestyles[l]}
             </label>
           ))}
         </div>
       </fieldset>
 
-      <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
+      <label className="block space-y-1.5">
+        <span className="text-sm font-medium">{t.profile.childrenCount}</span>
+        <input
+          type="number"
+          name="children_count"
+          min={0}
+          max={20}
+          defaultValue={profile?.children_count ?? 0}
+          className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2.5 dark:border-zinc-700 dark:bg-zinc-900 sm:w-32"
+        />
+      </label>
+
+      <div className="safe-bottom sticky bottom-0 -mx-4 flex flex-wrap items-center gap-3 border-t border-zinc-200 bg-white/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 dark:border-zinc-800 dark:bg-zinc-950/90">
         <button
           type="submit"
           disabled={isPending}
-          className="w-full rounded-md bg-zinc-900 px-4 py-3 text-base font-medium text-zinc-50 disabled:opacity-50 sm:w-auto dark:bg-zinc-100 dark:text-zinc-900"
+          className="inline-flex h-11 flex-1 items-center justify-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-zinc-50 disabled:opacity-50 sm:flex-none sm:px-6 dark:bg-zinc-100 dark:text-zinc-900"
         >
           {isPending ? t.common.saving : t.common.save}
         </button>
-        {!isFirstFill && (
-          <Link
-            href="/dashboard"
-            className="inline-flex h-11 items-center justify-center rounded-md px-3 text-sm text-zinc-600 underline transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
-          >
-            {t.common.backToDashboard}
-          </Link>
-        )}
         {state.error && (
           <span className="text-sm text-red-600 dark:text-red-400">
             {state.error}

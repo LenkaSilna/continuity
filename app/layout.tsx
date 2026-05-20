@@ -4,6 +4,9 @@ import { Toaster } from "sonner";
 import "./globals.css";
 import { I18nProvider } from "@/lib/i18n/client";
 import { getLocale, getMessages } from "@/lib/i18n/server";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { accentVars, isAccent, isTheme } from "@/lib/theme";
+import type { Accent, ThemeMode } from "@/lib/types";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,19 +45,44 @@ export default async function RootLayout({
   const locale = await getLocale();
   const messages = await getMessages();
 
+  let theme: ThemeMode = "light";
+  let accent: Accent = "lavender";
+  try {
+    // RLS restricts the query to the signed-in user automatically — skipping
+    // a separate auth.getUser() roundtrip in the critical render path.
+    const supabase = await createServerSupabaseClient();
+    const { data: profile } = await supabase
+      .from("profile")
+      .select("theme, accent")
+      .maybeSingle<{ theme: string; accent: string }>();
+    if (profile) {
+      if (isTheme(profile.theme)) theme = profile.theme;
+      if (isAccent(profile.accent)) accent = profile.accent;
+    }
+  } catch {
+    // Pre-migration or missing tables — fall back to defaults.
+  }
+
+  const vars = accentVars(accent, theme);
+  const bodyStyle = {
+    ["--background" as string]: vars.background,
+    ["--accent" as string]: vars.accent,
+    ["--accent-soft" as string]: vars.accentSoft,
+  } as React.CSSProperties;
+
   return (
     <html
       lang={locale}
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased ${theme === "dark" ? "dark" : ""}`}
     >
-      <body className="flex min-h-full flex-col safe-bottom">
+      <body className="flex min-h-full flex-col safe-bottom" style={bodyStyle}>
         <I18nProvider locale={locale} messages={messages}>
           {children}
           <Toaster
             position="top-center"
             closeButton
             richColors
-            theme="system"
+            theme={theme}
             toastOptions={{ duration: 6000 }}
           />
         </I18nProvider>

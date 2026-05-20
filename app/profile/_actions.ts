@@ -2,8 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { GENDERS, SKIN_TYPES, type SkinType } from "@/lib/skin-types";
-import type { Gender } from "@/lib/types";
+import { GENDERS } from "@/lib/skin-types";
+import type { Gender, Lifestyle } from "@/lib/types";
+
+const LIFESTYLES: readonly Lifestyle[] = [
+  "sedentary",
+  "light",
+  "active",
+  "very_active",
+];
 
 export type ProfileFormState = {
   error?: string;
@@ -28,12 +35,28 @@ export async function saveProfile(
     ? (genderRaw as Gender)
     : null;
 
-  const skinTypes = formData
-    .getAll("skin_types")
-    .map(String)
-    .filter((s): s is SkinType =>
-      (SKIN_TYPES as readonly string[]).includes(s),
-    );
+  // Accept presets + user-added custom strings. Trim, dedupe, cap length.
+  const skinTypes = Array.from(
+    new Set(
+      formData
+        .getAll("skin_types")
+        .map((v) => String(v).trim().slice(0, 40))
+        .filter(Boolean),
+    ),
+  );
+
+  const childrenRaw = Number(formData.get("children_count") ?? 0);
+  const childrenCount =
+    Number.isFinite(childrenRaw) && childrenRaw >= 0
+      ? Math.min(20, Math.floor(childrenRaw))
+      : 0;
+
+  const lifestyleRaw = String(formData.get("lifestyle") ?? "");
+  const lifestyle: Lifestyle = (LIFESTYLES as readonly string[]).includes(
+    lifestyleRaw,
+  )
+    ? (lifestyleRaw as Lifestyle)
+    : "sedentary";
 
   const { error } = await supabase.from("profile").upsert({
     user_id: user.id,
@@ -41,6 +64,8 @@ export async function saveProfile(
     date_of_birth: dob,
     gender,
     skin_types: skinTypes,
+    children_count: childrenCount,
+    lifestyle,
   });
 
   if (error) return { error: error.message };

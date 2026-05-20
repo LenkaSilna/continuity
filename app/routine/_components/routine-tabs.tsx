@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useI18n } from "@/lib/i18n/client";
 import type {
   Habit,
+  ItemKind,
   Product,
   ProductBrand,
   RoutineItem,
@@ -22,6 +23,7 @@ export function RoutineTabs({
   supplementBrands,
   habits,
   routineItems,
+  enabledKinds,
 }: {
   products: Product[];
   productBrands: ProductBrand[];
@@ -29,6 +31,7 @@ export function RoutineTabs({
   supplementBrands: SupplementBrand[];
   habits: Habit[];
   routineItems: RoutineItem[];
+  enabledKinds: ItemKind[];
 }) {
   const { t } = useI18n();
   const [active, setActive] = useState<TimeOfDay>("morning");
@@ -69,6 +72,7 @@ export function RoutineTabs({
         supplementBrands={supplementBrands}
         habits={habits}
         routineItems={routineItems}
+        enabledKinds={enabledKinds}
       />
     </div>
   );

@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getMessages } from "@/lib/i18n/server";
 import type { Profile } from "@/lib/types";
 import { TopNav } from "../_components/top-nav";
+import { BackToDashboard } from "../_components/back-to-dashboard";
 import { ProfileForm } from "./_components/profile-form";
 
 export default async function ProfilePage() {
@@ -18,12 +19,14 @@ export default async function ProfilePage() {
     .maybeSingle();
 
   const t = await getMessages();
+  const isFirstFill = !profile;
 
   return (
     <>
       <TopNav />
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6 sm:px-6 sm:py-12">
         <header className="mb-6 space-y-1">
+          {!isFirstFill && <BackToDashboard />}
           <h1 className="text-2xl font-semibold tracking-tight">
             {t.profile.title}
           </h1>

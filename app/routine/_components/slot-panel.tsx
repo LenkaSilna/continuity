@@ -32,6 +32,7 @@ export function SlotPanel({
   supplementBrands,
   habits,
   routineItems,
+  enabledKinds,
 }: {
   slot: TimeOfDay;
   products: Product[];
@@ -40,7 +41,9 @@ export function SlotPanel({
   supplementBrands: SupplementBrand[];
   habits: Habit[];
   routineItems: RoutineItem[];
+  enabledKinds: ItemKind[];
 }) {
+  const enabledSet = new Set(enabledKinds);
   const { t } = useI18n();
   const slotItems = useMemo(
     () => routineItems.filter((r) => r.time_of_day === slot),
@@ -107,39 +110,45 @@ export function SlotPanel({
 
   return (
     <div className="space-y-5">
-      <Section
-        kind="product"
-        slot={slot}
-        rows={productRows}
-        library={products.map((p) => ({
-          id: p.id,
-          label: p.name,
-          sub: p.brand_id
-            ? productBrands.find((b) => b.id === p.brand_id)?.name
-            : undefined,
-        }))}
-        usedIds={usedProductIds}
-      />
-      <Section
-        kind="supplement"
-        slot={slot}
-        rows={supplementRows}
-        library={supplements.map((s) => ({
-          id: s.id,
-          label: s.name,
-          sub: s.brand_id
-            ? supplementBrands.find((b) => b.id === s.brand_id)?.name
-            : undefined,
-        }))}
-        usedIds={usedSupplementIds}
-      />
-      <Section
-        kind="habit"
-        slot={slot}
-        rows={habitRows}
-        library={habits.map((h) => ({ id: h.id, label: h.name }))}
-        usedIds={usedHabitIds}
-      />
+      {enabledSet.has("product") && (
+        <Section
+          kind="product"
+          slot={slot}
+          rows={productRows}
+          library={products.map((p) => ({
+            id: p.id,
+            label: p.name,
+            sub: p.brand_id
+              ? productBrands.find((b) => b.id === p.brand_id)?.name
+              : undefined,
+          }))}
+          usedIds={usedProductIds}
+        />
+      )}
+      {enabledSet.has("supplement") && (
+        <Section
+          kind="supplement"
+          slot={slot}
+          rows={supplementRows}
+          library={supplements.map((s) => ({
+            id: s.id,
+            label: s.name,
+            sub: s.brand_id
+              ? supplementBrands.find((b) => b.id === s.brand_id)?.name
+              : undefined,
+          }))}
+          usedIds={usedSupplementIds}
+        />
+      )}
+      {enabledSet.has("habit") && (
+        <Section
+          kind="habit"
+          slot={slot}
+          rows={habitRows}
+          library={habits.map((h) => ({ id: h.id, label: h.name }))}
+          usedIds={usedHabitIds}
+        />
+      )}
     </div>
   );
 

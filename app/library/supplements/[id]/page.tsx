@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { requireModule } from "@/lib/modules";
 import { getMessages } from "@/lib/i18n/server";
 import type { Supplement, SupplementBrand, SupplementType } from "@/lib/types";
 import { TopNav } from "../../../_components/top-nav";
@@ -17,6 +18,7 @@ export default async function EditSupplementPage({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/");
+  await requireModule(supabase, "module_supplements");
 
   const [{ data: supplement }, { data: types }, { data: brands }] =
     await Promise.all([

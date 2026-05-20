@@ -1,9 +1,10 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getModuleFlags, requireModule } from "@/lib/modules";
 import { getMessages } from "@/lib/i18n/server";
 import type {
   Habit,
+  ItemKind,
   Product,
   ProductBrand,
   RoutineItem,
@@ -11,6 +12,7 @@ import type {
   SupplementBrand,
 } from "@/lib/types";
 import { TopNav } from "../_components/top-nav";
+import { BackToDashboard } from "../_components/back-to-dashboard";
 import { RoutineTabs } from "./_components/routine-tabs";
 
 export default async function RoutinePage() {
@@ -19,6 +21,13 @@ export default async function RoutinePage() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/");
+  await requireModule(supabase, "module_routine");
+
+  const flags = await getModuleFlags(supabase);
+  const enabledKinds: ItemKind[] = [];
+  if (flags.module_products) enabledKinds.push("product");
+  if (flags.module_supplements) enabledKinds.push("supplement");
+  if (flags.module_habits) enabledKinds.push("habit");
 
   const [
     { data: products },
@@ -58,12 +67,7 @@ export default async function RoutinePage() {
       <TopNav />
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-5 px-4 py-6 sm:px-6 sm:py-10">
         <header>
-          <Link
-            href="/dashboard"
-            className="-ml-3 mb-2 inline-flex h-10 items-center gap-1 rounded-md px-3 text-sm text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
-          >
-            ← {t.common.backToDashboard}
-          </Link>
+          <BackToDashboard />
           <h1 className="text-2xl font-semibold tracking-tight">
             {t.routine.title}
           </h1>
@@ -79,6 +83,7 @@ export default async function RoutinePage() {
           supplementBrands={(supplementBrands ?? []) as SupplementBrand[]}
           habits={(habits ?? []) as Habit[]}
           routineItems={(routineItems ?? []) as RoutineItem[]}
+          enabledKinds={enabledKinds}
         />
       </main>
     </>
