@@ -226,6 +226,7 @@ export function SlotPanel({
                       cancelLabel: t.common.cancel,
                       onConfirm: () =>
                         start(() => deleteRoutineItem(row.routineId)),
+                      successMessage: t.common.deleted,
                     });
                   }}
                   className="rounded px-2 py-0.5 text-xs text-zinc-500 hover:bg-zinc-200 hover:text-zinc-900 disabled:opacity-50 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"

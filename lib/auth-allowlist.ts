@@ -9,9 +9,10 @@ export function isEmailAllowed(email: string | null | undefined): boolean {
   const allowed = getAllowedEmails();
   if (allowed.length === 0) {
     if (process.env.NODE_ENV === "production") {
-      console.warn(
-        "[auth-allowlist] ALLOWED_EMAILS is empty — login is OPEN. Set ALLOWED_EMAILS env var to restrict access.",
+      console.error(
+        "[auth-allowlist] ALLOWED_EMAILS is not set — access denied. Set ALLOWED_EMAILS env var.",
       );
+      return false;
     }
     return true;
   }

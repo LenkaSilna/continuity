@@ -1,6 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isEmailAllowed } from "@/lib/auth-allowlist";
 
@@ -12,12 +13,23 @@ export type LoginErrorCode =
 export type LoginState = {
   errorCode?: LoginErrorCode;
   errorDetail?: string;
-  ok?: boolean;
+  awaitingCode?: boolean;
   emailSent?: string;
+  rateLimited?: boolean;
+};
+
+export type VerifyErrorCode =
+  | "missing_code"
+  | "invalid_code"
+  | "generic";
+
+export type VerifyState = {
+  errorCode?: VerifyErrorCode;
+  errorDetail?: string;
 };
 
 export async function requestMagicLink(
-  _prev: LoginState,
+  prev: LoginState,
   formData: FormData,
 ): Promise<LoginState> {
   const email = String(formData.get("email") ?? "")
@@ -40,8 +52,55 @@ export async function requestMagicLink(
   });
 
   if (error) {
-    return { errorCode: "supabase_error", errorDetail: error.message };
+    console.error("[requestMagicLink] status:", error.status, "message:", error.message);
+    const msg = error.message?.toLowerCase() ?? "";
+    const isRateLimit =
+      error.status === 429 ||
+      msg.includes("rate limit") ||
+      msg.includes("security purposes") ||
+      msg.includes("seconds");
+    return {
+      errorCode: "supabase_error",
+      errorDetail: error.message,
+      // keep code-entry screen visible if resending failed (e.g. rate limit)
+      awaitingCode: prev.awaitingCode,
+      emailSent: prev.emailSent,
+      rateLimited: isRateLimit,
+    };
   }
 
-  return { ok: true, emailSent: email };
+  return { awaitingCode: true, emailSent: email };
+}
+
+export async function verifyOtpCode(
+  _prev: VerifyState,
+  formData: FormData,
+): Promise<VerifyState> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const token = String(formData.get("token") ?? "").trim();
+
+  if (!token) return { errorCode: "missing_code" };
+
+  const supabase = await createServerSupabaseClient();
+  const { error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: "email",
+  });
+
+  if (error) {
+    console.error("[verifyOtp] status:", error.status, "message:", error.message, "code:", error.code);
+    const msg = error.message?.toLowerCase() ?? "";
+    if (
+      error.status === 422 ||
+      msg.includes("invalid") ||
+      msg.includes("expired") ||
+      msg.includes("otp")
+    ) {
+      return { errorCode: "invalid_code" };
+    }
+    return { errorCode: "generic", errorDetail: error.message };
+  }
+
+  redirect("/dashboard");
 }

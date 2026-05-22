@@ -2,7 +2,7 @@
 -- Run this in Supabase Dashboard → SQL Editor for a fresh install.
 -- Single, idempotent setup covering: profile, library (products/supplements/
 -- habits/observations), routine, calendar (mood, period, logs, notes), settings,
--- and per-module on/off flags. All tables have RLS — only own rows.
+-- per-module on/off flags, and AI prompts. All tables have RLS — only own rows.
 
 create extension if not exists "pgcrypto";
 
@@ -250,6 +250,32 @@ create table public.daily_tags (
 create index daily_tags_date_idx on public.daily_tags(user_id, log_date);
 
 -- ────────────────────────────────────────────────────────────────────────
+-- AI prompts
+-- ────────────────────────────────────────────────────────────────────────
+
+-- Saved edits of predefined prompts (skincare / supplements / correlation / weekly).
+-- When a row exists, the saved_text is shown instead of the auto-generated version.
+create table public.prompt_overrides (
+  id           uuid        primary key default gen_random_uuid(),
+  user_id      uuid        not null references auth.users on delete cascade,
+  prompt_type  text        not null,
+  saved_text   text        not null,
+  updated_at   timestamptz not null default now(),
+  unique (user_id, prompt_type)
+);
+
+-- Custom user-defined prompts with arbitrary data blocks.
+create table public.custom_prompts (
+  id           uuid        primary key default gen_random_uuid(),
+  user_id      uuid        not null references auth.users on delete cascade,
+  name         text        not null,
+  question     text        not null default '',
+  data_blocks  text[]      not null default '{}',
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now()
+);
+
+-- ────────────────────────────────────────────────────────────────────────
 -- RLS — every table: only own rows
 -- ────────────────────────────────────────────────────────────────────────
 alter table public.profile            enable row level security;
@@ -266,6 +292,8 @@ alter table public.daily_notes        enable row level security;
 alter table public.cycle_log          enable row level security;
 alter table public.tags               enable row level security;
 alter table public.daily_tags         enable row level security;
+alter table public.prompt_overrides   enable row level security;
+alter table public.custom_prompts     enable row level security;
 
 create policy "own rows" on public.profile
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
@@ -295,6 +323,10 @@ create policy "own rows" on public.tags
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own rows" on public.daily_tags
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "own rows" on public.prompt_overrides
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "own rows" on public.custom_prompts
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 -- ────────────────────────────────────────────────────────────────────────
 -- Auto-update profile.updated_at + daily_notes.updated_at
@@ -313,4 +345,12 @@ create trigger profile_set_updated_at
 
 create trigger daily_notes_set_updated_at
   before update on public.daily_notes
+  for each row execute function public.set_updated_at();
+
+create trigger prompt_overrides_set_updated_at
+  before update on public.prompt_overrides
+  for each row execute function public.set_updated_at();
+
+create trigger custom_prompts_set_updated_at
+  before update on public.custom_prompts
   for each row execute function public.set_updated_at();

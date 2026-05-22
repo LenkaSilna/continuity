@@ -1,9 +1,10 @@
 "use client";
 
-import { useTransition } from "react";
+import { useOptimistic, useTransition } from "react";
 import { setCycle } from "../../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import type { CycleIntensity } from "@/lib/types";
+import { showError } from "@/lib/toast";
 
 const intensityDot: Record<CycleIntensity, string> = {
   light: "bg-rose-300",
@@ -20,6 +21,7 @@ export function PeriodPicker({
 }) {
   const { t } = useI18n();
   const [isPending, start] = useTransition();
+  const [optimisticIntensity, setOptimisticIntensity] = useOptimistic(intensity);
 
   const options: { value: CycleIntensity | null; label: string }[] = [
     { value: null, label: t.calendar.day.period.none },
@@ -35,13 +37,19 @@ export function PeriodPicker({
       </h2>
       <div className="flex flex-wrap gap-2">
         {options.map(({ value, label }) => {
-          const active = intensity === value;
+          const active = optimisticIntensity === value;
           return (
             <button
               key={value ?? "none"}
               type="button"
               disabled={isPending}
-              onClick={() => start(() => setCycle(date, value))}
+              onClick={() =>
+                start(async () => {
+                  setOptimisticIntensity(value);
+                  const result = await setCycle(date, value);
+                  if (result?.error) showError(t.calendar.errors.generic);
+                })
+              }
               aria-pressed={active}
               className={[
                 "inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm transition disabled:opacity-50",

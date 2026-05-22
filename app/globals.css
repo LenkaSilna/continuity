@@ -58,6 +58,11 @@ body {
   input[type="radio"] {
     min-height: 44px;
   }
+  /* Toggle switch and chips have their own fixed sizes */
+  [role="switch"],
+  [data-chip] {
+    min-height: unset;
+  }
   input[type="text"],
   input[type="email"],
   input[type="date"],
@@ -74,4 +79,12 @@ input,
 select,
 textarea {
   font-size: 16px;
+}
+
+/* Sonner close button: fixed 20×20 circle, never stretched by touch-target rules */
+[data-close-button] {
+  height: 20px;
+  width: 20px;
+  min-height: unset;
+  min-width: unset;
 }

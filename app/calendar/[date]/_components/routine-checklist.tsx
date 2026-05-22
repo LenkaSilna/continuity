@@ -1,8 +1,9 @@
 "use client";
 
-import { useTransition } from "react";
+import { useOptimistic, useTransition } from "react";
 import { toggleDailyLog } from "../../_actions";
 import { useI18n } from "@/lib/i18n/client";
+import { showError } from "@/lib/toast";
 import type { ItemKind, TimeOfDay } from "@/lib/types";
 
 export type ChecklistItem = {
@@ -24,6 +25,15 @@ export function RoutineChecklist({
 }) {
   const { t } = useI18n();
   const [isPending, start] = useTransition();
+  const [optimisticLogged, toggleOptimistic] = useOptimistic(
+    logged,
+    (state: Set<string>, key: string) => {
+      const next = new Set(state);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    },
+  );
 
   const order: TimeOfDay[] = ["morning", "afternoon", "evening"];
   const slotLabels = t.routine.slots;
@@ -56,16 +66,18 @@ export function RoutineChecklist({
                   <ul className="space-y-1">
                     {items.map((item) => {
                       const key = `${slot}|${item.kind}|${item.itemId}`;
-                      const checked = logged.has(key);
+                      const checked = optimisticLogged.has(key);
                       return (
                         <li key={key}>
                           <button
                             type="button"
                             disabled={isPending}
                             onClick={() =>
-                              start(() =>
-                                toggleDailyLog(date, slot, item.kind, item.itemId),
-                              )
+                              start(async () => {
+                                toggleOptimistic(key);
+                                const result = await toggleDailyLog(date, slot, item.kind, item.itemId);
+                                if (result?.error) showError(t.calendar.errors.generic);
+                              })
                             }
                             aria-pressed={checked}
                             className={[

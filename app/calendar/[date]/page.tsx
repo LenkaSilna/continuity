@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getModuleFlags } from "@/lib/modules";
+import { getModuleFlagsCached } from "@/lib/modules";
 import { getLocale, getMessages } from "@/lib/i18n/server";
 import type {
   CycleIntensity,
@@ -15,6 +14,7 @@ import type {
 } from "@/lib/types";
 import { addDays, addMonths, parseISODate, toISODate } from "@/lib/calendar";
 import { TopNav } from "../../_components/top-nav";
+import { BackLink } from "../../_components/back-link";
 import { CalendarHeader } from "../_components/calendar-header";
 import { MoodPicker } from "./_components/mood-picker";
 import { PeriodPicker } from "./_components/period-picker";
@@ -42,7 +42,7 @@ export default async function CalendarDayPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/");
 
-  const flags = await getModuleFlags(supabase);
+  const flags = await getModuleFlagsCached();
 
   const [
     { data: products },
@@ -165,12 +165,7 @@ export default async function CalendarDayPage({
       <TopNav />
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-4 py-6 sm:px-6 sm:py-10">
         <header className="space-y-3">
-          <Link
-            href="/calendar"
-            className="-ml-3 inline-flex h-10 items-center gap-1 rounded-md px-3 text-sm text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
-          >
-            ← {t.calendar.day.back}
-          </Link>
+          <BackLink fallback="/calendar" label={t.calendar.day.back} />
           <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
           <CalendarHeader
             view="day"

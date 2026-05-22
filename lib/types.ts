@@ -153,3 +153,25 @@ export type DailyNote = {
   notes: string | null;
   updated_at: string;
 };
+
+export const DATA_BLOCKS = [
+  "profile",
+  "products",
+  "supplements",
+  "habits",
+  "observations",
+  "cycle",
+  "mood",
+  "data_context",
+] as const;
+
+export type DataBlock = (typeof DATA_BLOCKS)[number];
+
+export type CustomPrompt = {
+  id: string;
+  name: string;
+  question: string;
+  data_blocks: DataBlock[];
+  created_at: string;
+  updated_at: string;
+};

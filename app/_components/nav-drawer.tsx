@@ -55,7 +55,7 @@ export function NavDrawer({ flags }: { flags: ModuleFlags }) {
         onClick={close}
         aria-hidden
         className={[
-          "fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm transition-opacity",
+          "fixed inset-0 z-[100] bg-black/40 transition-opacity",
           open ? "opacity-100" : "pointer-events-none opacity-0",
         ].join(" ")}
       />
@@ -65,7 +65,7 @@ export function NavDrawer({ flags }: { flags: ModuleFlags }) {
         aria-modal="true"
         aria-label={t.menu.open}
         className={[
-          "safe-top safe-bottom fixed right-0 top-0 z-[101] flex h-full w-72 max-w-[85vw] flex-col border-l border-zinc-200 bg-white text-zinc-900 shadow-xl transition-transform dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100",
+          "safe-top safe-bottom fixed right-0 top-0 z-[101] flex h-full w-72 max-w-[85vw] flex-col border-l border-zinc-200 bg-white text-zinc-900 shadow-xl transition-transform will-change-transform dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100",
           open ? "translate-x-0" : "translate-x-full",
         ].join(" ")}
       >

@@ -1,12 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { cookies } from "next/headers";
 import "./globals.css";
 import { I18nProvider } from "@/lib/i18n/client";
 import { getLocale, getMessages } from "@/lib/i18n/server";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { accentVars, isAccent, isTheme } from "@/lib/theme";
-import type { Accent, ThemeMode } from "@/lib/types";
+import { accentVars } from "@/lib/theme";
+import {
+  ACCENT_COOKIE,
+  THEME_COOKIE,
+  parseAccentCookie,
+  parseThemeCookie,
+} from "@/lib/appearance";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,23 +50,9 @@ export default async function RootLayout({
   const locale = await getLocale();
   const messages = await getMessages();
 
-  let theme: ThemeMode = "light";
-  let accent: Accent = "lavender";
-  try {
-    // RLS restricts the query to the signed-in user automatically — skipping
-    // a separate auth.getUser() roundtrip in the critical render path.
-    const supabase = await createServerSupabaseClient();
-    const { data: profile } = await supabase
-      .from("profile")
-      .select("theme, accent")
-      .maybeSingle<{ theme: string; accent: string }>();
-    if (profile) {
-      if (isTheme(profile.theme)) theme = profile.theme;
-      if (isAccent(profile.accent)) accent = profile.accent;
-    }
-  } catch {
-    // Pre-migration or missing tables — fall back to defaults.
-  }
+  const cookieStore = await cookies();
+  const theme = parseThemeCookie(cookieStore.get(THEME_COOKIE)?.value);
+  const accent = parseAccentCookie(cookieStore.get(ACCENT_COOKIE)?.value);
 
   const vars = accentVars(accent, theme);
   const bodyStyle = {
@@ -80,6 +71,11 @@ export default async function RootLayout({
         style={bodyStyle}
         suppressHydrationWarning
       >
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js')`,
+          }}
+        />
         <I18nProvider locale={locale} messages={messages}>
           {children}
           <Toaster

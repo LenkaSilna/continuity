@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getModuleFlags, requireModule } from "@/lib/modules";
+import { getModuleFlagsCached } from "@/lib/modules";
 import { getMessages } from "@/lib/i18n/server";
 import type {
   Habit,
@@ -21,9 +21,8 @@ export default async function RoutinePage() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/");
-  await requireModule(supabase, "module_routine");
-
-  const flags = await getModuleFlags(supabase);
+  const flags = await getModuleFlagsCached();
+  if (!flags.module_routine) redirect("/dashboard");
   const enabledKinds: ItemKind[] = [];
   if (flags.module_products) enabledKinds.push("product");
   if (flags.module_supplements) enabledKinds.push("supplement");

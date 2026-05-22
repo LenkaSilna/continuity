@@ -46,55 +46,71 @@ export async function toggleDailyLog(
   timeOfDay: TimeOfDay,
   kind: ItemKind,
   itemId: string,
-): Promise<void> {
-  const supabase = await createServerSupabaseClient();
-  const col = refColumn(kind);
+): Promise<{ error?: string }> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "generic" };
+    const col = refColumn(kind);
 
-  const { data: existing } = await supabase
-    .from("daily_log")
-    .select("id")
-    .eq("log_date", date)
-    .eq("time_of_day", timeOfDay)
-    .eq("item_kind", kind)
-    .eq(col, itemId)
-    .maybeSingle();
+    const { data: existing } = await supabase
+      .from("daily_log")
+      .select("id")
+      .eq("log_date", date)
+      .eq("time_of_day", timeOfDay)
+      .eq("item_kind", kind)
+      .eq(col, itemId)
+      .maybeSingle();
 
-  if (existing?.id) {
-    await supabase.from("daily_log").delete().eq("id", existing.id);
-  } else {
-    const ref: LogRef =
-      kind === "product"
-        ? { item_kind: "product", product_id: itemId }
-        : kind === "supplement"
-          ? { item_kind: "supplement", supplement_id: itemId }
-          : { item_kind: "habit", habit_id: itemId };
-    await supabase.from("daily_log").insert({
-      log_date: date,
-      time_of_day: timeOfDay,
-      ...ref,
-    });
+    if (existing?.id) {
+      await supabase.from("daily_log").delete().eq("id", existing.id);
+    } else {
+      const ref: LogRef =
+        kind === "product"
+          ? { item_kind: "product", product_id: itemId }
+          : kind === "supplement"
+            ? { item_kind: "supplement", supplement_id: itemId }
+            : { item_kind: "habit", habit_id: itemId };
+      await supabase.from("daily_log").insert({
+        log_date: date,
+        time_of_day: timeOfDay,
+        ...ref,
+      });
+    }
+
+    revalidatePath("/calendar");
+    revalidatePath(`/calendar/${date}`);
+    return {};
+  } catch {
+    return { error: "generic" };
   }
-
-  revalidatePath("/calendar");
-  revalidatePath(`/calendar/${date}`);
 }
 
 // ─── mood + notes ────────────────────────────────────────────────
 
-export async function setMood(date: string, mood: number | null): Promise<void> {
-  const supabase = await createServerSupabaseClient();
-  if (mood === null) {
-    // Keep notes intact: only null the mood field if a row exists.
-    await supabase.from("daily_notes").upsert({ log_date: date, mood: null });
-  } else {
-    await supabase.from("daily_notes").upsert({ log_date: date, mood });
+export async function setMood(date: string, mood: number | null): Promise<{ error?: string }> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "generic" };
+    if (mood === null) {
+      // Keep notes intact: only null the mood field if a row exists.
+      await supabase.from("daily_notes").upsert({ log_date: date, mood: null });
+    } else {
+      await supabase.from("daily_notes").upsert({ log_date: date, mood });
+    }
+    revalidatePath("/calendar");
+    revalidatePath(`/calendar/${date}`);
+    return {};
+  } catch {
+    return { error: "generic" };
   }
-  revalidatePath("/calendar");
-  revalidatePath(`/calendar/${date}`);
 }
 
 export async function setNotes(date: string, notes: string): Promise<void> {
   const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
   await supabase.from("daily_notes").upsert({
     log_date: date,
     notes: notes.trim() || null,
@@ -107,17 +123,24 @@ export async function setNotes(date: string, notes: string): Promise<void> {
 export async function setCycle(
   date: string,
   intensity: CycleIntensity | null,
-): Promise<void> {
-  const supabase = await createServerSupabaseClient();
-  if (intensity === null) {
-    await supabase.from("cycle_log").delete().eq("log_date", date);
-  } else {
-    await supabase
-      .from("cycle_log")
-      .upsert({ log_date: date, intensity });
+): Promise<{ error?: string }> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "generic" };
+    if (intensity === null) {
+      await supabase.from("cycle_log").delete().eq("log_date", date);
+    } else {
+      await supabase
+        .from("cycle_log")
+        .upsert({ log_date: date, intensity });
+    }
+    revalidatePath("/calendar");
+    revalidatePath(`/calendar/${date}`);
+    return {};
+  } catch {
+    return { error: "generic" };
   }
-  revalidatePath("/calendar");
-  revalidatePath(`/calendar/${date}`);
 }
 
 // ─── tags (observations) per day ─────────────────────────────────
@@ -128,20 +151,28 @@ export type TagActionState = {
   ok?: boolean;
 };
 
-export async function attachTag(date: string, tagId: string): Promise<void> {
+export async function attachTag(date: string, tagId: string): Promise<{ error?: string }> {
   const supabase = await createServerSupabaseClient();
-  await supabase.from("daily_tags").upsert({ log_date: date, tag_id: tagId });
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "generic" };
+  const { error } = await supabase.from("daily_tags").upsert({ log_date: date, tag_id: tagId });
+  if (error) return { error: error.message };
   revalidatePath(`/calendar/${date}`);
+  return {};
 }
 
-export async function detachTag(date: string, tagId: string): Promise<void> {
+export async function detachTag(date: string, tagId: string): Promise<{ error?: string }> {
   const supabase = await createServerSupabaseClient();
-  await supabase
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "generic" };
+  const { error } = await supabase
     .from("daily_tags")
     .delete()
     .eq("log_date", date)
     .eq("tag_id", tagId);
+  if (error) return { error: error.message };
   revalidatePath(`/calendar/${date}`);
+  return {};
 }
 
 // Create a tag on the fly + attach to this day. Used from day detail.
@@ -154,6 +185,8 @@ export async function createAndAttachTag(
   if (!name) return { errorCode: "name_required" };
 
   const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { errorCode: "generic" };
 
   // Try existing first (unique on user_id+name).
   const { data: existing } = await supabase

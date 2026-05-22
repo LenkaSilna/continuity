@@ -6,6 +6,8 @@ import { setAccent, setModule, setTheme } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { accentHex, ACCENTS, THEMES } from "@/lib/theme";
 import type { ModuleFlags, Profile } from "@/lib/types";
+import { showError, showSuccess } from "@/lib/toast";
+import { Toggle } from "@/app/_components/toggle";
 
 const MODULE_KEYS: (keyof ModuleFlags)[] = [
   "module_products",
@@ -39,10 +41,15 @@ export function SettingsForm({
   const router = useRouter();
   const [isApplying, startApply] = useTransition();
 
-  const apply = (fn: () => Promise<void>) => {
+  const apply = (fn: () => Promise<{ error?: string }>) => {
     startApply(async () => {
-      await fn();
-      router.refresh();
+      const result = await fn();
+      if (result?.error) {
+        showError(t.settings.errors.generic);
+      } else {
+        showSuccess(t.settings.saved);
+        router.refresh();
+      }
     });
   };
 
@@ -58,7 +65,7 @@ export function SettingsForm({
           <legend className="text-xs font-medium">
             {t.settings.appearance.theme}
           </legend>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {THEMES.map((mode) => {
               const active = profile.theme === mode;
               return (
@@ -68,7 +75,7 @@ export function SettingsForm({
                   aria-pressed={active}
                   onClick={() => apply(() => setTheme(mode))}
                   className={[
-                    "flex min-h-[44px] flex-1 items-center justify-center rounded-md border px-3 py-2 text-sm transition disabled:opacity-50",
+                    "min-h-[44px] w-full truncate rounded-md border px-3 py-2 text-sm transition disabled:opacity-50",
                     active
                       ? "border-[var(--accent)] bg-[var(--accent-soft)]"
                       : "border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900",
@@ -85,7 +92,7 @@ export function SettingsForm({
           <legend className="text-xs font-medium">
             {t.settings.appearance.accent}
           </legend>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {ACCENTS.map((color) => {
               const active = profile.accent === color;
               return (
@@ -95,7 +102,7 @@ export function SettingsForm({
                   aria-pressed={active}
                   onClick={() => apply(() => setAccent(color))}
                   className={[
-                    "flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm transition disabled:opacity-50",
+                    "flex min-h-[44px] w-full items-center justify-center gap-2 rounded-md border px-2 py-2 text-sm transition disabled:opacity-50",
                     active
                       ? "border-zinc-900 dark:border-zinc-100"
                       : "border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900",
@@ -136,32 +143,12 @@ export function SettingsForm({
                     {t.settings.modules.descriptions[key]}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={enabled}
-                  aria-label={t.settings.modules.labels[key]}
+                <Toggle
+                  checked={!!enabled}
+                  onChange={() => apply(() => setModule(key, !enabled))}
                   disabled={isApplying}
-                  onClick={() => apply(() => setModule(key, !enabled))}
-                  className="relative inline-flex h-6 w-11 shrink-0 disabled:opacity-50"
-                >
-                  <span
-                    aria-hidden
-                    className={[
-                      "absolute inset-0 rounded-full transition",
-                      enabled
-                        ? "bg-[var(--accent)]"
-                        : "bg-zinc-300 dark:bg-zinc-700",
-                    ].join(" ")}
-                  />
-                  <span
-                    aria-hidden
-                    className={[
-                      "absolute left-0.5 top-0.5 inline-block h-5 w-5 rounded-full bg-white shadow transition",
-                      enabled ? "translate-x-5" : "",
-                    ].join(" ")}
-                  />
-                </button>
+                  ariaLabel={t.settings.modules.labels[key]}
+                />
               </li>
             );
           })}

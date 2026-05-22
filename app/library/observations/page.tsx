@@ -16,10 +16,19 @@ export default async function ObservationsLibraryPage() {
   if (!user) redirect("/");
   await requireModule(supabase, "module_observations");
 
-  const { data: tags } = await supabase
-    .from("tags")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const [{ data: tags }, { data: categoryRows }] = await Promise.all([
+    supabase.from("tags").select("*").order("created_at", { ascending: false }),
+    supabase
+      .from("tags")
+      .select("category")
+      .eq("user_id", user.id)
+      .not("category", "is", null)
+      .order("category", { ascending: true }),
+  ]);
+
+  const categories = [
+    ...new Set((categoryRows ?? []).map((r) => r.category as string)),
+  ];
 
   const t = await getMessages();
 
@@ -37,7 +46,7 @@ export default async function ObservationsLibraryPage() {
           </p>
         </header>
 
-        <AddObservationForm />
+        <AddObservationForm categories={categories} />
 
         <ObservationsList tags={(tags ?? []) as Tag[]} />
       </main>

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getModuleFlags } from "@/lib/modules";
+import { getModuleFlagsCached } from "@/lib/modules";
 import { getMessages } from "@/lib/i18n/server";
 import type { CalendarView, CycleIntensity, Profile } from "@/lib/types";
 import {
@@ -34,12 +34,15 @@ export default async function CalendarPage({
   if (!user) redirect("/");
 
   const { view: viewParam, date: dateParam } = await searchParams;
-  const t = await getMessages();
 
-  const { data: profile } = await supabase
-    .from("profile")
-    .select("calendar_view")
-    .maybeSingle<Pick<Profile, "calendar_view">>();
+  const [t, profileRes, flags] = await Promise.all([
+    getMessages(),
+    supabase
+      .from("profile")
+      .select("calendar_view")
+      .maybeSingle<Pick<Profile, "calendar_view">>(),
+    getModuleFlagsCached(),
+  ]);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -50,7 +53,7 @@ export default async function CalendarPage({
 
   const view: CalendarView = isValidView(viewParam)
     ? viewParam
-    : (profile?.calendar_view ?? "month");
+    : (profileRes.data?.calendar_view ?? "month");
 
   if (view === "day") {
     redirect(`/calendar/${focusISO}`);
@@ -70,8 +73,6 @@ export default async function CalendarPage({
 
   const startISO = toISODate(range.start);
   const endISO = toISODate(range.end);
-
-  const flags = await getModuleFlags(supabase);
 
   const [logsRes, notesRes, cyclesRes] = await Promise.all([
     flags.module_routine

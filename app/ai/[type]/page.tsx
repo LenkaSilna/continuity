@@ -23,7 +23,22 @@ export default async function AiTypePage({
   await requireModule(supabase, "module_ai");
 
   const t = await getMessages();
-  const text = await buildPrompt(supabase, type);
+
+  const [generatedText, overrideResponse] = await Promise.all([
+    buildPrompt(supabase, type),
+    supabase
+      .from("prompt_overrides")
+      .select("saved_text")
+      .eq("prompt_type", type)
+      .maybeSingle<{ saved_text: string }>(),
+  ]);
+
+  if (overrideResponse.error) {
+    console.error("Failed to load prompt override:", overrideResponse.error);
+  }
+
+  const override = overrideResponse.data;
+  const displayText = override?.saved_text ?? generatedText;
 
   return (
     <>
@@ -44,7 +59,13 @@ export default async function AiTypePage({
           </p>
         </header>
 
-        <PromptEditor key={text} initialText={text} />
+        <PromptEditor
+          key={displayText}
+          initialText={displayText}
+          promptType={type}
+          hasOverride={override != null}
+          generatedText={generatedText}
+        />
       </main>
     </>
   );

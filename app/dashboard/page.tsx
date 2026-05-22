@@ -6,6 +6,7 @@ import type { CycleIntensity, ItemKind, Profile } from "@/lib/types";
 import { PROMPT_TYPES } from "@/lib/ai-prompts";
 import { toISODate } from "@/lib/calendar";
 import { TopNav } from "../_components/top-nav";
+import { PencilIcon } from "../_components/icons";
 
 const intensityDot: Record<CycleIntensity, string> = {
   light: "bg-rose-300",
@@ -26,13 +27,11 @@ export default async function DashboardPage() {
 
   if (!user) redirect("/");
 
-  const { data: profile, error } = await supabase
-    .from("profile")
-    .select("*")
-    .maybeSingle<Profile>();
-
-  const t = await getMessages();
-  const locale = await getLocale();
+  const [{ data: profile, error }, t, locale] = await Promise.all([
+    supabase.from("profile").select("*").maybeSingle<Profile>(),
+    getMessages(),
+    getLocale(),
+  ]);
   const tableMissing = error?.code === "PGRST205" || error?.code === "42P01";
 
   if (!tableMissing && !error && !profile) {
@@ -164,9 +163,11 @@ export default async function DashboardPage() {
               </div>
               <Link
                 href="/profile"
-                className="inline-flex h-9 shrink-0 items-center rounded-md border border-zinc-300 px-3 text-sm text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                aria-label={t.common.edit}
+                className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-2 rounded-md border border-zinc-300 px-3 text-sm text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
               >
-                {t.common.edit}
+                <PencilIcon />
+                <span className="hidden sm:inline">{t.common.edit}</span>
               </Link>
             </section>
 

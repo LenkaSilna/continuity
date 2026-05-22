@@ -50,14 +50,14 @@ export default async function ProductsLibraryPage() {
           </p>
         </header>
 
-        <ProductTypesSection types={(types ?? []) as ProductType[]} />
-
-        <ProductBrandsSection brands={(brands ?? []) as ProductBrand[]} />
-
         <AddProductForm
           types={(types ?? []) as ProductType[]}
           brands={(brands ?? []) as ProductBrand[]}
         />
+
+        <ProductTypesSection types={(types ?? []) as ProductType[]} />
+
+        <ProductBrandsSection brands={(brands ?? []) as ProductBrand[]} />
 
         <ProductsList
           products={(products ?? []) as Product[]}

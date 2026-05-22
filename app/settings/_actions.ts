@@ -1,8 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isAccent, isTheme } from "@/lib/theme";
+import {
+  ACCENT_COOKIE,
+  THEME_COOKIE,
+  appearanceCookieOpts,
+} from "@/lib/appearance";
 import type { Accent, ModuleFlags, ThemeMode } from "@/lib/types";
 
 const MODULE_KEYS: (keyof ModuleFlags)[] = [
@@ -33,23 +39,36 @@ async function updateProfile(
   return {};
 }
 
-export async function setTheme(theme: ThemeMode): Promise<void> {
-  if (!isTheme(theme)) return;
-  await updateProfile({ theme });
+const cookieOpts = appearanceCookieOpts();
+
+export async function setTheme(theme: ThemeMode): Promise<{ error?: string }> {
+  if (!isTheme(theme)) return {};
+  const [result, cookieStore] = await Promise.all([
+    updateProfile({ theme }),
+    cookies(),
+  ]);
+  if (!result.error) cookieStore.set(THEME_COOKIE, theme, cookieOpts);
   revalidatePath("/", "layout");
+  return result;
 }
 
-export async function setAccent(accent: Accent): Promise<void> {
-  if (!isAccent(accent)) return;
-  await updateProfile({ accent });
+export async function setAccent(accent: Accent): Promise<{ error?: string }> {
+  if (!isAccent(accent)) return {};
+  const [result, cookieStore] = await Promise.all([
+    updateProfile({ accent }),
+    cookies(),
+  ]);
+  if (!result.error) cookieStore.set(ACCENT_COOKIE, accent, cookieOpts);
   revalidatePath("/", "layout");
+  return result;
 }
 
 export async function setModule(
   key: keyof ModuleFlags,
   value: boolean,
-): Promise<void> {
-  if (!MODULE_KEYS.includes(key)) return;
-  await updateProfile({ [key]: value });
+): Promise<{ error?: string }> {
+  if (!MODULE_KEYS.includes(key)) return {};
+  const result = await updateProfile({ [key]: value });
   revalidatePath("/", "layout");
+  return result;
 }

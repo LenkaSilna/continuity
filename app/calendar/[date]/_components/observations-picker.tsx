@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState, useTransition } from "react";
+import { useActionState, useOptimistic, useRef, useState, useTransition } from "react";
 import {
   attachTag,
   createAndAttachTag,
@@ -8,6 +8,7 @@ import {
   type TagActionState,
 } from "../../_actions";
 import { useI18n } from "@/lib/i18n/client";
+import { showError } from "@/lib/toast";
 import type { Tag } from "@/lib/types";
 
 const initialState: TagActionState = {};
@@ -24,6 +25,15 @@ export function ObservationsPicker({
   const { t } = useI18n();
   const [isPending, start] = useTransition();
   const [query, setQuery] = useState("");
+  const [optimisticAssigned, updateOptimisticAssigned] = useOptimistic(
+    assignedIds,
+    (state: Set<string>, action: { op: "add" | "remove"; id: string }) => {
+      const next = new Set(state);
+      if (action.op === "add") next.add(action.id);
+      else next.delete(action.id);
+      return next;
+    },
+  );
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleCreate = async (
@@ -49,16 +59,16 @@ export function ObservationsPicker({
   const matches = trimmed
     ? allTags.filter(
         (tag) =>
-          !assignedIds.has(tag.id) &&
+          !optimisticAssigned.has(tag.id) &&
           tag.name.toLowerCase().includes(lower),
       )
-    : allTags.filter((tag) => !assignedIds.has(tag.id));
+    : allTags.filter((tag) => !optimisticAssigned.has(tag.id));
 
   const exactExists =
     trimmed.length > 0 &&
     allTags.some((tag) => tag.name.toLowerCase() === lower);
 
-  const assigned = allTags.filter((tag) => assignedIds.has(tag.id));
+  const assigned = allTags.filter((tag) => optimisticAssigned.has(tag.id));
 
   return (
     <section className="space-y-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
@@ -77,8 +87,14 @@ export function ObservationsPicker({
               <button
                 type="button"
                 disabled={isPending}
-                onClick={() => start(() => detachTag(date, tag.id))}
-                className="inline-flex items-center gap-1.5 rounded-full border border-zinc-300 px-3 py-1 text-xs hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
+                onClick={() =>
+                  start(async () => {
+                    updateOptimisticAssigned({ op: "remove", id: tag.id });
+                    const result = await detachTag(date, tag.id);
+                    if (result?.error) showError(t.calendar.errors.generic);
+                  })
+                }
+                className="inline-flex h-8 items-center gap-1.5 rounded-full border border-zinc-300 px-3 text-sm hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
               >
                 <span
                   aria-hidden
@@ -115,12 +131,14 @@ export function ObservationsPicker({
                   disabled={isPending}
                   onClick={() => {
                     start(async () => {
-                      await attachTag(date, tag.id);
+                      updateOptimisticAssigned({ op: "add", id: tag.id });
+                      const result = await attachTag(date, tag.id);
+                      if (result?.error) showError(t.calendar.errors.generic);
                       setQuery("");
                       inputRef.current?.focus();
                     });
                   }}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-zinc-300 px-3 py-1 text-xs text-zinc-600 hover:border-zinc-500 hover:text-zinc-900 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-full border border-dashed border-zinc-300 px-3 text-sm text-zinc-600 hover:border-zinc-500 hover:text-zinc-900 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
                 >
                   <span
                     aria-hidden
@@ -146,7 +164,7 @@ export function ObservationsPicker({
 
         {createState.errorCode === "generic" && (
           <p className="text-xs text-red-600 dark:text-red-400">
-            {createState.errorDetail ?? t.calendar.errors.generic}
+            {t.calendar.errors.generic}
           </p>
         )}
       </form>

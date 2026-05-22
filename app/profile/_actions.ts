@@ -13,7 +13,7 @@ const LIFESTYLES: readonly Lifestyle[] = [
 ];
 
 export type ProfileFormState = {
-  error?: string;
+  errorCode?: "unauthenticated" | "generic";
   ok?: boolean;
 };
 
@@ -25,7 +25,7 @@ export async function saveProfile(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { error: "Not authenticated" };
+  if (!user) return { errorCode: "unauthenticated" };
 
   const name = String(formData.get("name") ?? "").trim() || null;
   const dob = String(formData.get("date_of_birth") ?? "").trim() || null;
@@ -68,7 +68,7 @@ export async function saveProfile(
     lifestyle,
   });
 
-  if (error) return { error: error.message };
+  if (error) return { errorCode: "generic" };
 
   revalidatePath("/dashboard");
   revalidatePath("/profile");

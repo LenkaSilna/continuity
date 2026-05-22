@@ -2,32 +2,49 @@
 
 import { useActionState } from "react";
 import { useSearchParams } from "next/navigation";
-import { requestMagicLink, type LoginState } from "./_actions/login";
+import {
+  requestMagicLink,
+  verifyOtpCode,
+  type LoginState,
+  type VerifyState,
+} from "./_actions/login";
 import { useI18n } from "@/lib/i18n/client";
 import { LocaleSwitcher } from "./_components/locale-switcher";
 
-const initialState: LoginState = {};
+const initialLoginState: LoginState = {};
+const initialVerifyState: VerifyState = {};
 
 export default function LoginPage() {
   const { t } = useI18n();
-  const [state, formAction, isPending] = useActionState(
+  const [loginState, loginAction, isLoginPending] = useActionState(
     requestMagicLink,
-    initialState,
+    initialLoginState,
+  );
+  const [verifyState, verifyAction, isVerifyPending] = useActionState(
+    verifyOtpCode,
+    initialVerifyState,
   );
   const params = useSearchParams();
   const urlError = params.get("error");
-  const hasFormResult = !!(state.errorCode || state.ok);
 
-  const errorMessage = (() => {
-    if (state.errorCode === "missing_email") return t.login.errors.missingEmail;
-    if (state.errorCode === "not_allowed") return t.login.errors.notAllowed;
-    if (state.errorCode === "supabase_error")
-      return state.errorDetail ?? t.login.errors.generic;
-    if (!hasFormResult && urlError) {
+  const loginErrorMessage = (() => {
+    if (loginState.errorCode === "missing_email") return t.login.errors.missingEmail;
+    if (loginState.errorCode === "not_allowed") return t.login.errors.notAllowed;
+    if (loginState.errorCode === "supabase_error")
+      return loginState.rateLimited ? t.login.errors.rateLimited : t.login.errors.generic;
+    if (!loginState.errorCode && !loginState.awaitingCode && urlError) {
       return (
         t.login.urlErrors[urlError as keyof typeof t.login.urlErrors] ?? urlError
       );
     }
+    return null;
+  })();
+
+  const verifyErrorMessage = (() => {
+    if (verifyState.errorCode === "missing_code") return t.login.errors.missingCode;
+    if (verifyState.errorCode === "invalid_code") return t.login.errors.invalidCode;
+    if (verifyState.errorCode === "generic")
+      return t.login.errors.generic;
     return null;
   })();
 
@@ -47,14 +64,63 @@ export default function LoginPage() {
             </p>
           </header>
 
-          {state.ok ? (
-            <p className="rounded-md border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200">
-              {t.login.checkInbox}
-              <br />
-              <strong>{state.emailSent}</strong>
-            </p>
+          {loginState.awaitingCode ? (
+            <div className="space-y-4">
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                {t.login.awaitingCode}{" "}
+                <strong className="text-zinc-900 dark:text-zinc-100">
+                  {loginState.emailSent}
+                </strong>
+                <br />
+                <span className="text-xs">{t.login.awaitingCodeHint}</span>
+              </p>
+              <form action={verifyAction} className="space-y-4">
+                <input type="hidden" name="email" value={loginState.emailSent} />
+                <label className="block space-y-2">
+                  <span className="text-sm font-medium">{t.login.codeLabel}</span>
+                  <input
+                    name="token"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]{6,8}"
+                    maxLength={8}
+                    autoComplete="one-time-code"
+                    autoFocus
+                    className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2.5 text-center text-2xl font-mono tracking-widest shadow-sm focus:border-zinc-900 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:focus:border-zinc-100"
+                    placeholder={t.login.codePlaceholder}
+                  />
+                </label>
+                <button
+                  type="submit"
+                  disabled={isVerifyPending}
+                  className="w-full rounded-md bg-zinc-900 px-3 py-3 text-base font-medium text-zinc-50 transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+                >
+                  {isVerifyPending ? t.login.verifying : t.login.verify}
+                </button>
+                {verifyErrorMessage && (
+                  <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
+                    {verifyErrorMessage}
+                  </p>
+                )}
+              </form>
+              <form action={loginAction}>
+                <input type="hidden" name="email" value={loginState.emailSent} />
+                <button
+                  type="submit"
+                  disabled={isLoginPending}
+                  className="w-full text-center text-sm text-zinc-500 underline-offset-2 hover:underline disabled:opacity-50"
+                >
+                  {isLoginPending ? t.login.sending : t.login.resend}
+                </button>
+              </form>
+              {loginErrorMessage && (
+                <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
+                  {loginErrorMessage}
+                </p>
+              )}
+            </div>
           ) : (
-            <form action={formAction} className="space-y-4">
+            <form action={loginAction} className="space-y-4">
               <label className="block space-y-2">
                 <span className="text-sm font-medium">{t.login.emailLabel}</span>
                 <input
@@ -69,14 +135,14 @@ export default function LoginPage() {
               </label>
               <button
                 type="submit"
-                disabled={isPending}
+                disabled={isLoginPending}
                 className="w-full rounded-md bg-zinc-900 px-3 py-3 text-base font-medium text-zinc-50 transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
               >
-                {isPending ? t.login.sending : t.login.send}
+                {isLoginPending ? t.login.sending : t.login.send}
               </button>
-              {errorMessage && (
+              {loginErrorMessage && (
                 <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
-                  {errorMessage}
+                  {loginErrorMessage}
                 </p>
               )}
             </form>

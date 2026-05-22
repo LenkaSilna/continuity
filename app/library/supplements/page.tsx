@@ -50,14 +50,14 @@ export default async function SupplementsLibraryPage() {
           </p>
         </header>
 
-        <SupplementTypesSection types={(types ?? []) as SupplementType[]} />
-
-        <SupplementBrandsSection
+        <AddSupplementForm
+          types={(types ?? []) as SupplementType[]}
           brands={(brands ?? []) as SupplementBrand[]}
         />
 
-        <AddSupplementForm
-          types={(types ?? []) as SupplementType[]}
+        <SupplementTypesSection types={(types ?? []) as SupplementType[]} />
+
+        <SupplementBrandsSection
           brands={(brands ?? []) as SupplementBrand[]}
         />
 

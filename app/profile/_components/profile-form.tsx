@@ -5,6 +5,7 @@ import { saveProfile, type ProfileFormState } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { GENDERS, SKIN_TYPES } from "@/lib/skin-types";
 import type { Lifestyle, Profile } from "@/lib/types";
+import { showError, showSuccess } from "@/lib/toast";
 
 const LIFESTYLES: readonly Lifestyle[] = [
   "sedentary",
@@ -54,10 +55,17 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
   const customSkinTypes = skinTypes.filter((s) => !presetSet.has(s));
 
   useEffect(() => {
-    if (state.ok && isFirstFill) {
+    if (!state.ok) return;
+    if (isFirstFill) {
       window.location.href = "/dashboard";
+    } else {
+      showSuccess(t.common.saved);
     }
-  }, [state.ok, isFirstFill]);
+  }, [state.ok, isFirstFill, t]);
+
+  useEffect(() => {
+    if (state.errorCode) showError(t.settings.errors.generic);
+  }, [state.errorCode, t]);
 
   return (
     <form action={formAction} className="space-y-6">
@@ -231,16 +239,6 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
         >
           {isPending ? t.common.saving : t.common.save}
         </button>
-        {state.error && (
-          <span className="text-sm text-red-600 dark:text-red-400">
-            {state.error}
-          </span>
-        )}
-        {state.ok && !isPending && !isFirstFill && (
-          <span className="text-sm text-emerald-600 dark:text-emerald-400">
-            {t.common.saved}
-          </span>
-        )}
       </div>
     </form>
   );

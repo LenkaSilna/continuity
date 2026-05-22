@@ -20,13 +20,20 @@ export default async function EditObservationPage({
   if (!user) redirect("/");
   await requireModule(supabase, "module_observations");
 
-  const { data: tag } = await supabase
-    .from("tags")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle<Tag>();
+  const [{ data: tag }, { data: categoryRows }] = await Promise.all([
+    supabase.from("tags").select("*").eq("id", id).maybeSingle<Tag>(),
+    supabase
+      .from("tags")
+      .select("category")
+      .not("category", "is", null)
+      .order("category", { ascending: true }),
+  ]);
 
   if (!tag) notFound();
+
+  const categories = [
+    ...new Set((categoryRows ?? []).map((r) => r.category as string)),
+  ];
 
   const t = await getMessages();
 
@@ -46,7 +53,7 @@ export default async function EditObservationPage({
           </h1>
         </header>
 
-        <EditObservationForm tag={tag} />
+        <EditObservationForm tag={tag} categories={categories} />
       </main>
     </>
   );

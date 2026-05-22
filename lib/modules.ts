@@ -1,5 +1,7 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { createServerSupabaseClient } from "./supabase/server";
 import type { ModuleFlags } from "./types";
 
 export async function getModuleFlags(
@@ -25,6 +27,13 @@ export async function getModuleFlags(
     }
   );
 }
+
+// Deduplicated per-request: calling this multiple times in the same render
+// tree (e.g. TopNav + page) issues only one DB query.
+export const getModuleFlagsCached = cache(async (): Promise<ModuleFlags> => {
+  const supabase = await createServerSupabaseClient();
+  return getModuleFlags(supabase);
+});
 
 // Redirects to /dashboard if module is disabled.
 export async function requireModule(

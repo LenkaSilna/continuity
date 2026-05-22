@@ -3,6 +3,10 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { addHabit, type ActionState } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
+import { showSuccess } from "@/lib/toast";
+import { AddDashedButton } from "@/app/_components/add-dashed-button";
+import { FormField, fieldInputCn } from "@/app/_components/form-field";
+import { FormActions } from "@/app/_components/form-actions";
 
 const initialState: ActionState = {};
 
@@ -14,27 +18,22 @@ export function AddHabitForm() {
 
   useEffect(() => {
     if (state.ok) {
+      showSuccess(t.common.saved);
       formRef.current?.reset();
     }
   }, [state]);
 
   const errorMessage = (() => {
-    if (state.errorCode === "name_required")
-      return t.library.habits.errors.nameRequired;
-    if (state.errorCode === "generic")
-      return state.errorDetail ?? t.library.habits.errors.generic;
+    if (state.errorCode === "name_required") return t.library.habits.errors.nameRequired;
+    if (state.errorCode === "generic") return t.library.habits.errors.generic;
     return null;
   })();
 
   if (!open) {
     return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="w-full rounded-md border-2 border-dashed border-zinc-300 px-4 py-3 text-sm font-medium text-zinc-600 hover:border-zinc-900 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-100 dark:hover:text-zinc-100"
-      >
+      <AddDashedButton onClick={() => setOpen(true)}>
         + {t.library.habits.add}
-      </button>
+      </AddDashedButton>
     );
   }
 
@@ -48,54 +47,34 @@ export function AddHabitForm() {
         {t.library.habits.add}
       </h3>
 
-      <label className="block space-y-1">
-        <span className="text-xs font-medium">
-          {t.library.habits.form.name} {t.common.requiredField}
-        </span>
+      <FormField label={`${t.library.habits.form.name} ${t.common.requiredField}`}>
         <input
           name="name"
           required
           placeholder={t.library.habits.form.namePlaceholder}
-          className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+          className={fieldInputCn}
         />
-      </label>
+      </FormField>
 
-      <label className="block space-y-1">
-        <span className="text-xs font-medium">
-          {t.library.habits.form.description}
-        </span>
+      <FormField label={t.library.habits.form.description}>
         <textarea
           name="description"
           rows={2}
           placeholder={t.library.habits.form.descriptionPlaceholder}
-          className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+          className={fieldInputCn}
         />
-      </label>
+      </FormField>
 
-      <div className="flex gap-2 pt-1">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-50 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-        >
-          {isPending ? t.common.saving : t.common.save}
-        </button>
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          className="rounded-md border border-zinc-300 px-4 py-2 text-sm dark:border-zinc-700"
-        >
-          {t.library.habits.cancel}
-        </button>
-      </div>
+      <FormActions
+        isPending={isPending}
+        onCancel={() => setOpen(false)}
+        saveLabel={t.common.save}
+        savingLabel={t.common.saving}
+        cancelLabel={t.library.habits.cancel}
+      />
 
       {errorMessage && (
         <p className="text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
-      )}
-      {state.ok && (
-        <p className="text-sm text-emerald-600 dark:text-emerald-400">
-          {t.common.saved}
-        </p>
       )}
     </form>
   );

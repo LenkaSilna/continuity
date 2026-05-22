@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useTransition } from "react";
 import { deleteSupplement } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
+import { EmptyState } from "@/app/_components/empty-state";
+import { ListItemActions } from "@/app/_components/list-item-actions";
 import type { Supplement, SupplementBrand, SupplementType } from "@/lib/types";
 
 export function SupplementsList({
@@ -24,11 +25,7 @@ export function SupplementsList({
     id ? brands.find((brand) => brand.id === id)?.name ?? null : null;
 
   if (supplements.length === 0) {
-    return (
-      <p className="rounded-lg border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500 dark:border-zinc-700">
-        {t.library.supplements.empty}
-      </p>
-    );
+    return <EmptyState message={t.library.supplements.empty} />;
   }
 
   return (
@@ -55,17 +52,13 @@ export function SupplementsList({
               )}
               {s.dosage && (
                 <p className="text-xs text-zinc-600 dark:text-zinc-400">
-                  <span className="text-zinc-500">
-                    {t.library.supplements.form.dosage}:
-                  </span>{" "}
+                  <span className="text-zinc-500">{t.library.supplements.form.dosage}:</span>{" "}
                   {s.dosage}
                 </p>
               )}
               {s.purpose && (
                 <p className="text-xs text-zinc-600 dark:text-zinc-400">
-                  <span className="text-zinc-500">
-                    {t.library.supplements.form.purpose}:
-                  </span>{" "}
+                  <span className="text-zinc-500">{t.library.supplements.form.purpose}:</span>{" "}
                   {s.purpose}
                 </p>
               )}
@@ -85,30 +78,21 @@ export function SupplementsList({
                 </p>
               )}
             </div>
-            <div className="flex shrink-0 flex-col gap-1">
-              <Link
-                href={`/library/supplements/${s.id}`}
-                className="rounded-md border border-zinc-300 px-2 py-1 text-center text-xs text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
-              >
-                {t.common.edit}
-              </Link>
-              <button
-                type="button"
-                aria-label={`Delete ${s.name}`}
-                disabled={isPending}
-                onClick={() => {
-                  confirmToast({
-                    message: t.library.supplements.card.confirmDelete,
-                    confirmLabel: t.common.delete,
-                    cancelLabel: t.common.cancel,
-                    onConfirm: () => start(() => deleteSupplement(s.id)),
-                  });
-                }}
-                className="rounded-md border border-zinc-300 px-2 py-1 text-xs text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-900"
-              >
-                {t.common.delete}
-              </button>
-            </div>
+            <ListItemActions
+              editHref={`/library/supplements/${s.id}`}
+              editAriaLabel={`Edit ${s.name}`}
+              deleteAriaLabel={`Delete ${s.name}`}
+              isDeleting={isPending}
+              onDelete={() =>
+                confirmToast({
+                  message: t.library.supplements.card.confirmDelete,
+                  confirmLabel: t.common.delete,
+                  cancelLabel: t.common.cancel,
+                  onConfirm: () => start(() => deleteSupplement(s.id)),
+                  successMessage: t.common.deleted,
+                })
+              }
+            />
           </li>
         );
       })}
