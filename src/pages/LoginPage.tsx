@@ -98,7 +98,7 @@ export function LoginPage() {
       : null;
 
   return (
-    <>
+    <div className="flex min-h-dvh flex-col">
       <div className="safe-top flex justify-end px-4 py-2">
         <LocaleSwitcher />
       </div>
@@ -205,6 +205,6 @@ export function LoginPage() {
           </a>
         </div>
       </footer>
-    </>
+    </div>
   );
 }
