@@ -137,20 +137,27 @@ app/
   routine/_actions.ts         ← addItem / updateItem / archiveItem / reorderItems
   settings/_actions.ts        ← saveSettings
 lib/
-  supabase/browser.ts         ← browser Supabase client (VITE_* env vars)
+  supabase/browser.ts         ← browser Supabase client (validates VITE_* env vars on init)
   i18n/                       ← cs + en dictionary, localStorage locale
   modules.ts                  ← getModuleFlags helper
   calendar.ts                 ← month/week date math + mood colour
   theme.ts                    ← accent palette + helpers
   appearance.ts               ← apply theme/accent to DOM + localStorage
   ai-prompts.ts               ← prompt builders (4 predefined + buildCustomPrompt)
-  types.ts                    ← DB row types, DataBlock, CustomPrompt
+  types.ts                    ← DB row types, DataBlock, CustomPrompt, ActionState
   skin-types.ts               ← preset skin types + gender constants
   auth-allowlist.ts           ← VITE_ALLOWED_EMAILS parser + check
+  confirm-toast.tsx           ← shared confirmation toast (message + detail + confirm/cancel)
+  with-delete.ts              ← shared delete handler (action → error check → invalidate → navigate → success)
+app/
+  _components/
+    error-state.tsx           ← shared full-screen error fallback
+    …
 public/
   sw.js                       ← service worker: cache-first for assets, network-only for rest
-  _redirects                  ← Netlify SPA fallback: /* /index.html 200
+  _redirects                  ← Netlify SPA fallback (also in netlify.toml)
   manifest.json + icons
+netlify.toml                  ← build config + SPA redirect + SECRETS_SCAN_OMIT_KEYS
 supabase/migrations/
   0001_initial_schema.sql     ← full schema in one file (run once for fresh install)
 ```
@@ -189,13 +196,17 @@ tap targets for native feel.
 
 1. Push to GitHub.
 2. Netlify → New site from Git → select repo.
-3. Build settings:
-   - **Build command**: `npm run build`
-   - **Publish directory**: `dist`
-4. **Environment variables**:
+3. Build command and publish directory are set in `netlify.toml` — no manual config needed.
+4. **Environment variables** (Netlify UI → Site settings → Environment variables):
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
    - `VITE_ALLOWED_EMAILS`
+   - `AI_API_KEY` *(optional — reserved for future AI integration)*
+
+   > **Note:** `netlify.toml` sets `SECRETS_SCAN_OMIT_KEYS` for the three `VITE_*` vars.
+   > Vite intentionally embeds them in the browser bundle — without this, Netlify's secrets
+   > scanner would fail the build.
+
 5. **After first deploy** — open Supabase **Auth → URL Configuration** and:
    - Add `https://<your-site>.netlify.app/auth/callback` to **Redirect URLs**
    - Update **Site URL** to `https://<your-site>.netlify.app`
