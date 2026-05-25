@@ -1,6 +1,5 @@
-"use client";
-
-import { useOptimistic, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toggleDailyLog } from "../../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { showError } from "@/lib/toast";
@@ -24,20 +23,48 @@ export function RoutineChecklist({
   logged: Set<string>;
 }) {
   const { t } = useI18n();
-  const [isPending, start] = useTransition();
-  const [optimisticLogged, toggleOptimistic] = useOptimistic(
-    logged,
-    (state: Set<string>, key: string) => {
-      const next = new Set(state);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    },
-  );
+  const queryClient = useQueryClient();
+  const [localLogged, setLocalLogged] = useState(logged);
+  const [pendingKeys, setPendingKeys] = useState(new Set<string>());
+  const serverRef = useRef(logged);
+
+  useEffect(() => {
+    serverRef.current = logged;
+    setLocalLogged(logged);
+  }, [logged]);
 
   const order: TimeOfDay[] = ["morning", "afternoon", "evening"];
   const slotLabels = t.routine.slots;
   const allEmpty = order.every((s) => slots[s].length === 0);
+
+  const handleToggle = async (
+    key: string,
+    slot: TimeOfDay,
+    kind: ItemKind,
+    itemId: string,
+  ) => {
+    if (pendingKeys.has(key)) return;
+    setLocalLogged((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+    setPendingKeys((prev) => new Set([...prev, key]));
+    const result = await toggleDailyLog(date, slot, kind, itemId);
+    setPendingKeys((prev) => {
+      const next = new Set(prev);
+      next.delete(key);
+      return next;
+    });
+    if (result?.error) {
+      showError(t.calendar.errors.generic);
+      setLocalLogged(serverRef.current);
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["calendar-day", date] });
+      queryClient.invalidateQueries({ queryKey: ["calendar-data"] });
+    }
+  };
 
   return (
     <section className="space-y-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
@@ -66,18 +93,15 @@ export function RoutineChecklist({
                   <ul className="space-y-1">
                     {items.map((item) => {
                       const key = `${slot}|${item.kind}|${item.itemId}`;
-                      const checked = optimisticLogged.has(key);
+                      const checked = localLogged.has(key);
+                      const isItemPending = pendingKeys.has(key);
                       return (
                         <li key={key}>
                           <button
                             type="button"
-                            disabled={isPending}
+                            disabled={isItemPending}
                             onClick={() =>
-                              start(async () => {
-                                toggleOptimistic(key);
-                                const result = await toggleDailyLog(date, slot, item.kind, item.itemId);
-                                if (result?.error) showError(t.calendar.errors.generic);
-                              })
+                              handleToggle(key, slot, item.kind, item.itemId)
                             }
                             aria-pressed={checked}
                             className={[

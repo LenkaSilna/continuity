@@ -1,6 +1,4 @@
-"use client";
-
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { DATA_BLOCKS, type DataBlock } from "@/lib/types";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
@@ -8,13 +6,9 @@ import { showError } from "@/lib/toast";
 import { ToggleChip } from "@/app/_components/toggle-chip";
 import type { CustomPromptActionState } from "../_actions";
 
-const initialState: CustomPromptActionState = {};
-
 type Props = {
-  action: (
-    prev: CustomPromptActionState,
-    formData: FormData,
-  ) => Promise<CustomPromptActionState>;
+  onSubmit: (formData: FormData) => Promise<CustomPromptActionState>;
+  onSuccess?: (state: CustomPromptActionState) => void;
   initialName?: string;
   initialQuestion?: string;
   initialBlocks?: DataBlock[];
@@ -22,30 +16,21 @@ type Props = {
 };
 
 export function CustomPromptForm({
-  action,
+  onSubmit,
+  onSuccess,
   initialName = "",
   initialQuestion = "",
   initialBlocks = [],
   onDelete,
 }: Props) {
   const { t } = useI18n();
-  const [state, formAction, isPending] = useActionState(action, initialState);
+  const [isPending, startSave] = useTransition();
   const [isDeleting, startDelete] = useTransition();
   const [selected, setSelected] = useState<Set<DataBlock>>(
     new Set(initialBlocks),
   );
   const [name, setName] = useState(initialName);
   const [question, setQuestion] = useState(initialQuestion);
-
-  useEffect(() => {
-    if (state.errorCode) {
-      const msg =
-        state.errorCode === "name_required"
-          ? t.ai.custom.errors.nameRequired
-          : t.ai.custom.errors.generic;
-      showError(msg);
-    }
-  }, [state.errorCode, t]);
 
   const toggleBlock = (block: DataBlock) => {
     setSelected((prev) => {
@@ -56,8 +41,25 @@ export function CustomPromptForm({
     });
   };
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    startSave(async () => {
+      const result = await onSubmit(formData);
+      if (result.errorCode) {
+        const msg =
+          result.errorCode === "name_required"
+            ? t.ai.custom.errors.nameRequired
+            : t.ai.custom.errors.generic;
+        showError(msg);
+      } else {
+        onSuccess?.(result);
+      }
+    });
+  };
+
   return (
-    <form action={formAction} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {/* Name */}
       <div className="space-y-1">
         <label className="block text-xs font-medium">
@@ -108,7 +110,7 @@ export function CustomPromptForm({
         />
       </div>
 
-      <div className="safe-bottom sticky bottom-0 -mx-4 flex items-center gap-2 border-t border-zinc-200 bg-white/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 dark:border-zinc-800 dark:bg-zinc-950/90">
+      <div className="safe-bottom sticky bottom-0 -mx-4 flex items-center gap-2 border-t border-zinc-200 bg-[var(--background)]/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 dark:border-zinc-800 ">
         <button
           type="submit"
           disabled={isPending}
@@ -123,6 +125,7 @@ export function CustomPromptForm({
             onClick={() =>
               confirmToast({
                 message: t.ai.custom.confirmDelete,
+                detail: name,
                 confirmLabel: t.common.delete,
                 cancelLabel: t.common.cancel,
                 onConfirm: () => startDelete(() => onDelete()),

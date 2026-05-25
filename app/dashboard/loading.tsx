@@ -1,4 +1,0 @@
-import { PageSkeleton } from "@/app/_components/page-skeleton";
-export default function Loading() {
-  return <PageSkeleton rows={5} tall />;
-}

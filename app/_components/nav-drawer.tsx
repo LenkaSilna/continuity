@@ -1,13 +1,10 @@
-"use client";
-
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n/client";
+import { supabase } from "@/lib/supabase/browser";
 import type { ModuleFlags } from "@/lib/types";
 
-// Returns false during SSR, true on the client. Avoids the
-// useEffect/setState mount pattern that the lint rule flags.
 const noop = () => () => {};
 function useIsClient(): boolean {
   return useSyncExternalStore(
@@ -31,7 +28,6 @@ export function NavDrawer({ flags }: { flags: ModuleFlags }) {
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
-  // Prevent body scroll while drawer is open.
   useEffect(() => {
     if (!open) return;
     const previous = document.body.style.overflow;
@@ -42,6 +38,11 @@ export function NavDrawer({ flags }: { flags: ModuleFlags }) {
   }, [open]);
 
   const close = () => setOpen(false);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  };
 
   const sectionClass =
     "px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500";
@@ -65,7 +66,7 @@ export function NavDrawer({ flags }: { flags: ModuleFlags }) {
         aria-modal="true"
         aria-label={t.menu.open}
         className={[
-          "safe-top safe-bottom fixed right-0 top-0 z-[101] flex h-full w-72 max-w-[85vw] flex-col border-l border-zinc-200 bg-white text-zinc-900 shadow-xl transition-transform will-change-transform dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100",
+          "safe-top safe-bottom fixed right-0 top-0 z-[101] flex h-full w-72 max-w-[85vw] flex-col border-l border-zinc-200 bg-[var(--background)] text-zinc-900 shadow-xl transition-transform will-change-transform dark:border-zinc-800 dark:text-zinc-100",
           open ? "translate-x-0" : "translate-x-full",
         ].join(" ")}
       >
@@ -97,19 +98,19 @@ export function NavDrawer({ flags }: { flags: ModuleFlags }) {
 
         <nav className="flex flex-1 flex-col overflow-y-auto px-1 pb-2">
           <div className={sectionClass}>{t.menu.sections.main}</div>
-          <Link href="/dashboard" onClick={close} className={linkClass}>
+          <Link to="/dashboard" onClick={close} className={linkClass}>
             {t.menu.home}
           </Link>
-          <Link href="/calendar" onClick={close} className={linkClass}>
+          <Link to="/calendar" search={{ view: undefined, date: undefined }} onClick={close} className={linkClass}>
             {t.calendar.title}
           </Link>
           {flags.module_routine && (
-            <Link href="/routine" onClick={close} className={linkClass}>
+            <Link to="/routine" onClick={close} className={linkClass}>
               {t.routine.title}
             </Link>
           )}
           {flags.module_ai && (
-            <Link href="/ai" onClick={close} className={linkClass}>
+            <Link to="/ai" onClick={close} className={linkClass}>
               {t.ai.title}
             </Link>
           )}
@@ -121,54 +122,43 @@ export function NavDrawer({ flags }: { flags: ModuleFlags }) {
             <div className={sectionClass}>{t.menu.sections.library}</div>
           )}
           {flags.module_products && (
-            <Link
-              href="/library/products"
-              onClick={close}
-              className={linkClass}
-            >
+            <Link to="/library/products" onClick={close} className={linkClass}>
               {t.library.products.title}
             </Link>
           )}
           {flags.module_supplements && (
-            <Link
-              href="/library/supplements"
-              onClick={close}
-              className={linkClass}
-            >
+            <Link to="/library/supplements" onClick={close} className={linkClass}>
               {t.library.supplements.title}
             </Link>
           )}
           {flags.module_habits && (
-            <Link href="/library/habits" onClick={close} className={linkClass}>
+            <Link to="/library/habits" onClick={close} className={linkClass}>
               {t.library.habits.title}
             </Link>
           )}
           {flags.module_observations && (
-            <Link
-              href="/library/observations"
-              onClick={close}
-              className={linkClass}
-            >
+            <Link to="/library/observations" onClick={close} className={linkClass}>
               {t.library.observations.title}
             </Link>
           )}
 
           <div className={sectionClass}>{t.menu.sections.account}</div>
-          <Link href="/profile" onClick={close} className={linkClass}>
+          <Link to="/profile" onClick={close} className={linkClass}>
             {t.profile.title}
           </Link>
-          <Link href="/settings" onClick={close} className={linkClass}>
+          <Link to="/settings" onClick={close} className={linkClass}>
             {t.settings.title}
           </Link>
 
-          <form action="/auth/signout" method="post" className="mt-2 px-3">
+          <div className="mt-2 px-3">
             <button
-              type="submit"
+              type="button"
+              onClick={handleSignOut}
               className="inline-flex h-10 w-full items-center justify-center rounded-md border border-zinc-300 text-sm text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
             >
               {t.common.signOut}
             </button>
-          </form>
+          </div>
         </nav>
       </aside>
     </>

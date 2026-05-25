@@ -1,7 +1,4 @@
-"use server";
-
-import { revalidatePath } from "next/cache";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { supabase } from "@/lib/supabase/browser";
 
 export type ActionState = {
   errorCode?: "name_required" | "exists" | "generic";
@@ -20,33 +17,26 @@ function readForm(formData: FormData) {
   };
 }
 
-export async function addObservation(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
+export async function addObservation(formData: FormData): Promise<ActionState> {
   const { name, category, color } = readForm(formData);
   if (!name) return { errorCode: "name_required" };
 
-  const supabase = await createServerSupabaseClient();
   const { error } = await supabase.from("tags").insert({ name, category, color });
 
   if (error) {
     if (error.code === "23505") return { errorCode: "exists" };
     return { errorCode: "generic", errorDetail: error.message };
   }
-  revalidatePath("/library/observations");
   return { ok: true };
 }
 
 export async function updateObservation(
   id: string,
-  _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   const { name, category, color } = readForm(formData);
   if (!name) return { errorCode: "name_required" };
 
-  const supabase = await createServerSupabaseClient();
   const { error } = await supabase
     .from("tags")
     .update({ name, category, color })
@@ -56,13 +46,9 @@ export async function updateObservation(
     if (error.code === "23505") return { errorCode: "exists" };
     return { errorCode: "generic", errorDetail: error.message };
   }
-  revalidatePath("/library/observations");
-  revalidatePath(`/library/observations/${id}`);
   return { ok: true };
 }
 
 export async function deleteObservation(id: string): Promise<void> {
-  const supabase = await createServerSupabaseClient();
   await supabase.from("tags").delete().eq("id", id);
-  revalidatePath("/library/observations");
 }

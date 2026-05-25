@@ -1,12 +1,12 @@
-import Link from "next/link";
-import { getMessages } from "@/lib/i18n/server";
+import { Link } from "@tanstack/react-router";
+import { useI18n } from "@/lib/i18n/client";
 
-export async function BackToDashboard() {
-  const t = await getMessages();
+export function BackToDashboard() {
+  const { t } = useI18n();
   const label = t.common.backToDashboard;
   return (
     <Link
-      href="/dashboard"
+      to="/dashboard"
       aria-label={label}
       className="-ml-3 mb-2 inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
     >

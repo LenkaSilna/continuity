@@ -1,6 +1,5 @@
-"use client";
-
 import { useTransition } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { deleteObservation } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
@@ -10,6 +9,7 @@ import type { Tag } from "@/lib/types";
 
 export function ObservationsList({ tags }: { tags: Tag[] }) {
   const { t } = useI18n();
+  const queryClient = useQueryClient();
   const [isPending, start] = useTransition();
 
   if (tags.length === 0) {
@@ -44,9 +44,15 @@ export function ObservationsList({ tags }: { tags: Tag[] }) {
             onDelete={() =>
               confirmToast({
                 message: t.library.observations.card.confirmDelete,
+                detail: tag.name,
                 confirmLabel: t.common.delete,
                 cancelLabel: t.common.cancel,
-                onConfirm: () => start(() => deleteObservation(tag.id)),
+                onConfirm: () =>
+                  start(async () => {
+                    await deleteObservation(tag.id);
+                    queryClient.invalidateQueries({ queryKey: ["observations"] });
+                    queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
+                  }),
                 successMessage: t.common.deleted,
               })
             }

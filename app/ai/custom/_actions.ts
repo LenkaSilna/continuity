@@ -1,11 +1,9 @@
-"use server";
-
-import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { supabase } from "@/lib/supabase/browser";
 import { DATA_BLOCKS, type DataBlock } from "@/lib/types";
 
 export type CustomPromptActionState = {
   errorCode?: "name_required" | "not_found" | "generic";
+  createdId?: string;
 };
 
 function parseBlocks(formData: FormData): DataBlock[] {
@@ -15,7 +13,6 @@ function parseBlocks(formData: FormData): DataBlock[] {
 }
 
 export async function createCustomPrompt(
-  _prev: CustomPromptActionState,
   formData: FormData,
 ): Promise<CustomPromptActionState> {
   const name = (formData.get("name") as string | null)?.trim() ?? "";
@@ -24,10 +21,7 @@ export async function createCustomPrompt(
   const question = (formData.get("question") as string | null) ?? "";
   const data_blocks = parseBlocks(formData);
 
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { errorCode: "generic" };
 
   const { data, error } = await supabase
@@ -41,12 +35,11 @@ export async function createCustomPrompt(
     return { errorCode: "generic" };
   }
 
-  redirect(`/ai/custom/${data.id}`);
+  return { createdId: data.id as string };
 }
 
 export async function updateCustomPrompt(
   id: string,
-  _prev: CustomPromptActionState,
   formData: FormData,
 ): Promise<CustomPromptActionState> {
   const name = (formData.get("name") as string | null)?.trim() ?? "";
@@ -54,12 +47,6 @@ export async function updateCustomPrompt(
 
   const question = (formData.get("question") as string | null) ?? "";
   const data_blocks = parseBlocks(formData);
-
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { errorCode: "generic" };
 
   const { error } = await supabase
     .from("custom_prompts")
@@ -71,16 +58,10 @@ export async function updateCustomPrompt(
     return { errorCode: "generic" };
   }
 
-  redirect(`/ai/custom/${id}`);
+  return {};
 }
 
-export async function deleteCustomPrompt(id: string): Promise<void> {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/ai");
-
-  await supabase.from("custom_prompts").delete().eq("id", id);
-  redirect("/ai");
+export async function deleteCustomPrompt(id: string): Promise<{ error?: string }> {
+  const { error } = await supabase.from("custom_prompts").delete().eq("id", id);
+  return error ? { error: error.message } : {};
 }

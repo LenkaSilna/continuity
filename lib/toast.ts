@@ -1,5 +1,3 @@
-"use client";
-
 import { toast } from "sonner";
 
 export function showSuccess(message: string): void {

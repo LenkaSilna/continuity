@@ -1,8 +1,5 @@
-"use server";
-
-import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { supabase } from "@/lib/supabase/browser";
 
 export type ActionState = {
   errorCode?: "name_required" | "type_exists" | "brand_exists" | "generic";
@@ -12,14 +9,10 @@ export type ActionState = {
 
 // ─── product types ───────────────────────────────────────────────
 
-export async function addProductType(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
+export async function addProductType(formData: FormData): Promise<ActionState> {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return { errorCode: "name_required" };
 
-  const supabase = await createServerSupabaseClient();
   const { count } = await supabase
     .from("product_types")
     .select("*", { count: "exact", head: true });
@@ -32,59 +25,47 @@ export async function addProductType(
     if (error.code === "23505") return { errorCode: "type_exists" };
     return { errorCode: "generic", errorDetail: error.message };
   }
-  revalidatePath("/library/products");
   return { ok: true };
 }
 
 export async function deleteProductType(id: string): Promise<void> {
-  const supabase = await createServerSupabaseClient();
   await supabase.from("product_types").delete().eq("id", id);
-  revalidatePath("/library/products");
 }
 
 // ─── product brands ──────────────────────────────────────────────
 
-export async function addProductBrand(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
+export async function addProductBrand(formData: FormData): Promise<ActionState> {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return { errorCode: "name_required" };
 
-  const supabase = await createServerSupabaseClient();
   const { error } = await supabase.from("product_brands").insert({ name });
 
   if (error) {
     if (error.code === "23505") return { errorCode: "brand_exists" };
     return { errorCode: "generic", errorDetail: error.message };
   }
-  revalidatePath("/library/products");
   return { ok: true };
 }
 
 export async function deleteProductBrand(id: string): Promise<void> {
-  const supabase = await createServerSupabaseClient();
   await supabase.from("product_brands").delete().eq("id", id);
-  revalidatePath("/library/products");
 }
 
-// Resolve a free-text brand name into a brand_id. Inserts the brand row
-// on first use so the dropdown picks it up on the next add.
 async function resolveProductBrandId(
-  supabase: SupabaseClient,
+  client: SupabaseClient,
   rawName: string,
 ): Promise<string | null> {
   const name = rawName.trim();
   if (!name) return null;
 
-  const { data: existing } = await supabase
+  const { data: existing } = await client
     .from("product_brands")
     .select("id")
     .eq("name", name)
     .maybeSingle();
   if (existing?.id) return existing.id as string;
 
-  const { data: inserted, error } = await supabase
+  const { data: inserted, error } = await client
     .from("product_brands")
     .insert({ name })
     .select("id")
@@ -95,36 +76,29 @@ async function resolveProductBrandId(
 
 // ─── products ────────────────────────────────────────────────────
 
-export async function addProduct(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
+export async function addProduct(formData: FormData): Promise<ActionState> {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return { errorCode: "name_required" };
 
   const typeIdRaw = String(formData.get("type_id") ?? "").trim();
   const brandName = String(formData.get("brand") ?? "");
-  const supabase = await createServerSupabaseClient();
   const brand_id = await resolveProductBrandId(supabase, brandName);
 
   const { error } = await supabase.from("products").insert({
     name,
     brand_id,
     type_id: typeIdRaw || null,
-    active_ingredients:
-      String(formData.get("active_ingredients") ?? "").trim() || null,
+    active_ingredients: String(formData.get("active_ingredients") ?? "").trim() || null,
     inci: String(formData.get("inci") ?? "").trim() || null,
     notes: String(formData.get("notes") ?? "").trim() || null,
   });
 
   if (error) return { errorCode: "generic", errorDetail: error.message };
-  revalidatePath("/library/products");
   return { ok: true };
 }
 
 export async function updateProduct(
   id: string,
-  _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   const name = String(formData.get("name") ?? "").trim();
@@ -132,7 +106,6 @@ export async function updateProduct(
 
   const typeIdRaw = String(formData.get("type_id") ?? "").trim();
   const brandName = String(formData.get("brand") ?? "");
-  const supabase = await createServerSupabaseClient();
   const brand_id = await resolveProductBrandId(supabase, brandName);
 
   const { error } = await supabase
@@ -141,21 +114,16 @@ export async function updateProduct(
       name,
       brand_id,
       type_id: typeIdRaw || null,
-      active_ingredients:
-        String(formData.get("active_ingredients") ?? "").trim() || null,
+      active_ingredients: String(formData.get("active_ingredients") ?? "").trim() || null,
       inci: String(formData.get("inci") ?? "").trim() || null,
       notes: String(formData.get("notes") ?? "").trim() || null,
     })
     .eq("id", id);
 
   if (error) return { errorCode: "generic", errorDetail: error.message };
-  revalidatePath("/library/products");
-  revalidatePath(`/library/products/${id}`);
   return { ok: true };
 }
 
 export async function deleteProduct(id: string): Promise<void> {
-  const supabase = await createServerSupabaseClient();
   await supabase.from("products").delete().eq("id", id);
-  revalidatePath("/library/products");
 }

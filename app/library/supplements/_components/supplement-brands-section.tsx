@@ -1,6 +1,5 @@
-"use client";
-
-import { useActionState, useTransition } from "react";
+import { useActionState, useEffect, useTransition } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { addSupplementBrand, deleteSupplementBrand, type ActionState } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
@@ -13,8 +12,16 @@ const initialState: ActionState = {};
 
 export function SupplementBrandsSection({ brands }: { brands: SupplementBrand[] }) {
   const { t } = useI18n();
-  const [state, formAction, isPending] = useActionState(addSupplementBrand, initialState);
-  const [deletingId, startDelete] = useTransition();
+  const queryClient = useQueryClient();
+  const [state, formAction, isPending] = useActionState(
+    (_: ActionState, fd: FormData) => addSupplementBrand(fd),
+    initialState,
+  );
+  const [isDeleting, startDelete] = useTransition();
+
+  useEffect(() => {
+    if (state.ok) queryClient.invalidateQueries({ queryKey: ["supplement-brands"] });
+  }, [state.ok]);
 
   const errorMessage = (() => {
     if (state.errorCode === "name_required") return t.library.supplements.errors.nameRequired;
@@ -38,13 +45,18 @@ export function SupplementBrandsSection({ brands }: { brands: SupplementBrand[] 
               key={brand.id}
               label={brand.name}
               deleteAriaLabel={`Delete ${brand.name}`}
-              disabled={deletingId}
+              disabled={isDeleting}
               onDelete={() =>
                 confirmToast({
                   message: t.library.supplements.brands.confirmDelete,
+                  detail: brand.name,
                   confirmLabel: t.common.delete,
                   cancelLabel: t.common.cancel,
-                  onConfirm: () => startDelete(() => deleteSupplementBrand(brand.id)),
+                  onConfirm: () =>
+                    startDelete(async () => {
+                      await deleteSupplementBrand(brand.id);
+                      queryClient.invalidateQueries({ queryKey: ["supplement-brands"] });
+                    }),
                   successMessage: t.common.deleted,
                 })
               }

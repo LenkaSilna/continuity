@@ -1,7 +1,6 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useId, useTransition } from "react";
+import { useState, useId, useTransition } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { deleteObservation, updateObservation, type ActionState } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
@@ -9,8 +8,6 @@ import { showSuccess } from "@/lib/toast";
 import { FormField, fieldInputCn } from "@/app/_components/form-field";
 import { EditFormActions } from "@/app/_components/edit-form-actions";
 import type { Tag } from "@/lib/types";
-
-const initialState: ActionState = {};
 
 export function EditObservationForm({
   tag,
@@ -20,18 +17,27 @@ export function EditObservationForm({
   categories: string[];
 }) {
   const { t } = useI18n();
-  const router = useRouter();
-  const boundUpdate = updateObservation.bind(null, tag.id);
-  const [state, formAction, isPending] = useActionState(boundUpdate, initialState);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [state, setState] = useState<ActionState>({});
+  const [isPending, startSave] = useTransition();
   const [isDeleting, startDelete] = useTransition();
   const categoryListId = useId();
 
-  useEffect(() => {
-    if (state.ok) {
-      showSuccess(t.common.saved);
-      router.push("/library/observations");
-    }
-  }, [state.ok, router]);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    startSave(async () => {
+      const result = await updateObservation(tag.id, formData);
+      setState(result);
+      if (result.ok) {
+        showSuccess(t.common.saved);
+        queryClient.invalidateQueries({ queryKey: ["observations"] });
+        queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
+        navigate({ to: "/library/observations" });
+      }
+    });
+  };
 
   const errorMessage = (() => {
     if (state.errorCode === "name_required") return t.library.observations.errors.nameRequired;
@@ -41,7 +47,7 @@ export function EditObservationForm({
   })();
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <FormField label={`${t.library.observations.form.name} ${t.common.requiredField}`}>
         <input
           name="name"
@@ -89,13 +95,15 @@ export function EditObservationForm({
         onDelete={() =>
           confirmToast({
             message: t.library.observations.card.confirmDelete,
+            detail: tag.name,
             confirmLabel: t.common.delete,
             cancelLabel: t.common.cancel,
             onConfirm: () =>
               startDelete(async () => {
                 await deleteObservation(tag.id);
-                router.push("/library/observations");
-                router.refresh();
+                queryClient.invalidateQueries({ queryKey: ["observations"] });
+        queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
+                navigate({ to: "/library/observations" });
               }),
             successMessage: t.common.deleted,
           })

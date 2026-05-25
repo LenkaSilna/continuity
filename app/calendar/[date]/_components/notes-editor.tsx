@@ -1,6 +1,5 @@
-"use client";
-
 import { useEffect, useRef, useState, useTransition } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { setNotes } from "../../_actions";
 import { useI18n } from "@/lib/i18n/client";
 
@@ -12,6 +11,7 @@ export function NotesEditor({
   initial: string;
 }) {
   const { t } = useI18n();
+  const queryClient = useQueryClient();
   const [value, setValue] = useState(initial);
   const [isPending, start] = useTransition();
   const [savedAt, setSavedAt] = useState<number | null>(null);
@@ -24,6 +24,7 @@ export function NotesEditor({
         await setNotes(date, value);
         lastSaved.current = value;
         setSavedAt(Date.now());
+        queryClient.invalidateQueries({ queryKey: ["calendar-day", date] });
       });
     }, 800);
     return () => clearTimeout(handle);

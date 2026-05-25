@@ -1,7 +1,6 @@
-"use client";
-
-import { useActionState, useEffect, useState } from "react";
-import { saveProfile, type ProfileFormState } from "../_actions";
+import { useState, useTransition } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { saveProfile } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { GENDERS, SKIN_TYPES } from "@/lib/skin-types";
 import type { Lifestyle, Profile } from "@/lib/types";
@@ -13,8 +12,6 @@ const LIFESTYLES: readonly Lifestyle[] = [
   "active",
   "very_active",
 ];
-
-const initialState: ProfileFormState = {};
 
 function calcAge(dob: string | null): number | null {
   if (!dob) return null;
@@ -29,7 +26,8 @@ function calcAge(dob: string | null): number | null {
 
 export function ProfileForm({ profile }: { profile: Profile | null }) {
   const { t } = useI18n();
-  const [state, formAction, isPending] = useActionState(saveProfile, initialState);
+  const queryClient = useQueryClient();
+  const [isPending, startSave] = useTransition();
   const [dob, setDob] = useState(profile?.date_of_birth ?? "");
   const [skinTypes, setSkinTypes] = useState<string[]>(
     profile?.skin_types ?? [],
@@ -54,21 +52,27 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
   const presetSet = new Set<string>(SKIN_TYPES);
   const customSkinTypes = skinTypes.filter((s) => !presetSet.has(s));
 
-  useEffect(() => {
-    if (!state.ok) return;
-    if (isFirstFill) {
-      window.location.href = "/dashboard";
-    } else {
-      showSuccess(t.common.saved);
-    }
-  }, [state.ok, isFirstFill, t]);
-
-  useEffect(() => {
-    if (state.errorCode) showError(t.settings.errors.generic);
-  }, [state.errorCode, t]);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    skinTypes.forEach((s) => formData.append("skin_types", s));
+    startSave(async () => {
+      const result = await saveProfile(formData);
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
+        if (isFirstFill) {
+          window.location.href = "/dashboard";
+        } else {
+          showSuccess(t.common.saved);
+        }
+      } else if (result.errorCode) {
+        showError(t.settings.errors.generic);
+      }
+    });
+  };
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <label className="block space-y-1.5">
         <span className="text-sm font-medium">{t.profile.name}</span>
         <input
@@ -124,16 +128,6 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
           {t.profile.skinTypes}{" "}
           <span className="text-zinc-500">{t.profile.skinTypesHint}</span>
         </legend>
-
-        {/* Hidden inputs are the source of truth for form submission. */}
-        {skinTypes.map((s) => (
-          <input
-            key={`hidden-${s}`}
-            type="hidden"
-            name="skin_types"
-            value={s}
-          />
-        ))}
 
         <div className="grid gap-2 sm:grid-cols-2">
           {SKIN_TYPES.map((skin) => {
@@ -227,11 +221,11 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
           min={0}
           max={20}
           defaultValue={profile?.children_count ?? 0}
-          className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2.5 dark:border-zinc-700 dark:bg-zinc-900 sm:w-32"
+          className="block w-full rounded-md border border-zinc-300 bg-white px-3 py-2.5 dark:border-zinc-700 dark:bg-zinc-900 sm:w-32"
         />
       </label>
 
-      <div className="safe-bottom sticky bottom-0 -mx-4 flex flex-wrap items-center gap-3 border-t border-zinc-200 bg-white/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 dark:border-zinc-800 dark:bg-zinc-950/90">
+      <div className="safe-bottom sticky bottom-0 -mx-4 flex flex-wrap items-center gap-3 border-t border-zinc-200 bg-[var(--background)]/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 dark:border-zinc-800 ">
         <button
           type="submit"
           disabled={isPending}

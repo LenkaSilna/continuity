@@ -1,6 +1,5 @@
-"use client";
-
-import { useActionState, useOptimistic, useRef, useState, useTransition } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   attachTag,
   createAndAttachTag,
@@ -23,27 +22,65 @@ export function ObservationsPicker({
   assignedIds: Set<string>;
 }) {
   const { t } = useI18n();
-  const [isPending, start] = useTransition();
+  const queryClient = useQueryClient();
+  const [isPending, setIsPending] = useState(false);
   const [query, setQuery] = useState("");
-  const [optimisticAssigned, updateOptimisticAssigned] = useOptimistic(
-    assignedIds,
-    (state: Set<string>, action: { op: "add" | "remove"; id: string }) => {
-      const next = new Set(state);
-      if (action.op === "add") next.add(action.id);
-      else next.delete(action.id);
-      return next;
-    },
-  );
+  const [localAssigned, setLocalAssigned] = useState(assignedIds);
+  const serverRef = useRef(assignedIds);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    serverRef.current = assignedIds;
+    setLocalAssigned(assignedIds);
+  }, [assignedIds]);
+
+  const handleDetach = async (tagId: string) => {
+    if (isPending) return;
+    setLocalAssigned((prev) => {
+      const next = new Set(prev);
+      next.delete(tagId);
+      return next;
+    });
+    setIsPending(true);
+    const result = await detachTag(date, tagId);
+    setIsPending(false);
+    if (result?.error) {
+      showError(t.calendar.errors.generic);
+      setLocalAssigned(serverRef.current);
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["calendar-day", date] });
+    }
+  };
+
+  const handleAttach = async (tagId: string) => {
+    if (isPending) return;
+    setLocalAssigned((prev) => {
+      const next = new Set(prev);
+      next.add(tagId);
+      return next;
+    });
+    setQuery("");
+    inputRef.current?.focus();
+    setIsPending(true);
+    const result = await attachTag(date, tagId);
+    setIsPending(false);
+    if (result?.error) {
+      showError(t.calendar.errors.generic);
+      setLocalAssigned(serverRef.current);
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["calendar-day", date] });
+    }
+  };
+
   const handleCreate = async (
-    prev: TagActionState,
+    _: TagActionState,
     formData: FormData,
   ): Promise<TagActionState> => {
-    const result = await createAndAttachTag(date, prev, formData);
+    const result = await createAndAttachTag(date, formData);
     if (result.ok) {
       setQuery("");
       inputRef.current?.focus();
+      queryClient.invalidateQueries({ queryKey: ["calendar-day", date] });
     }
     return result;
   };
@@ -59,16 +96,16 @@ export function ObservationsPicker({
   const matches = trimmed
     ? allTags.filter(
         (tag) =>
-          !optimisticAssigned.has(tag.id) &&
+          !localAssigned.has(tag.id) &&
           tag.name.toLowerCase().includes(lower),
       )
-    : allTags.filter((tag) => !optimisticAssigned.has(tag.id));
+    : allTags.filter((tag) => !localAssigned.has(tag.id));
 
   const exactExists =
     trimmed.length > 0 &&
     allTags.some((tag) => tag.name.toLowerCase() === lower);
 
-  const assigned = allTags.filter((tag) => optimisticAssigned.has(tag.id));
+  const assigned = allTags.filter((tag) => localAssigned.has(tag.id));
 
   return (
     <section className="space-y-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
@@ -87,13 +124,7 @@ export function ObservationsPicker({
               <button
                 type="button"
                 disabled={isPending}
-                onClick={() =>
-                  start(async () => {
-                    updateOptimisticAssigned({ op: "remove", id: tag.id });
-                    const result = await detachTag(date, tag.id);
-                    if (result?.error) showError(t.calendar.errors.generic);
-                  })
-                }
+                onClick={() => handleDetach(tag.id)}
                 className="inline-flex h-8 items-center gap-1.5 rounded-full border border-zinc-300 px-3 text-sm hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
               >
                 <span
@@ -129,15 +160,7 @@ export function ObservationsPicker({
                 <button
                   type="button"
                   disabled={isPending}
-                  onClick={() => {
-                    start(async () => {
-                      updateOptimisticAssigned({ op: "add", id: tag.id });
-                      const result = await attachTag(date, tag.id);
-                      if (result?.error) showError(t.calendar.errors.generic);
-                      setQuery("");
-                      inputRef.current?.focus();
-                    });
-                  }}
+                  onClick={() => handleAttach(tag.id)}
                   className="inline-flex h-8 items-center gap-1.5 rounded-full border border-dashed border-zinc-300 px-3 text-sm text-zinc-600 hover:border-zinc-500 hover:text-zinc-900 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
                 >
                   <span

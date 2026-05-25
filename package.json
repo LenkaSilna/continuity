@@ -1,31 +1,33 @@
 {
   "name": "continuity",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
     "lint": "eslint",
     "icons": "node scripts/gen-icons.mjs"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.105.4",
-    "next": "16.2.6",
+    "@tanstack/react-query": "^5",
+    "@tanstack/react-router": "^1",
+    "geist": "^1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "sonner": "^2.0.7"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/vite": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4",
     "eslint": "^9",
-    "eslint-config-next": "16.2.6",
-    "sharp": "^0.34.5",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite": "^6"
   }
 }

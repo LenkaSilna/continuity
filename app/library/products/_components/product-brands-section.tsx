@@ -1,6 +1,5 @@
-"use client";
-
-import { useActionState, useTransition } from "react";
+import { useActionState, useEffect, useTransition } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { addProductBrand, deleteProductBrand, type ActionState } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
@@ -13,8 +12,16 @@ const initialState: ActionState = {};
 
 export function ProductBrandsSection({ brands }: { brands: ProductBrand[] }) {
   const { t } = useI18n();
-  const [state, formAction, isPending] = useActionState(addProductBrand, initialState);
-  const [deletingId, startDelete] = useTransition();
+  const queryClient = useQueryClient();
+  const [state, formAction, isPending] = useActionState(
+    (_: ActionState, fd: FormData) => addProductBrand(fd),
+    initialState,
+  );
+  const [isDeleting, startDelete] = useTransition();
+
+  useEffect(() => {
+    if (state.ok) queryClient.invalidateQueries({ queryKey: ["product-brands"] });
+  }, [state.ok]);
 
   const errorMessage = (() => {
     if (state.errorCode === "name_required") return t.library.products.errors.nameRequired;
@@ -38,13 +45,18 @@ export function ProductBrandsSection({ brands }: { brands: ProductBrand[] }) {
               key={brand.id}
               label={brand.name}
               deleteAriaLabel={`Delete ${brand.name}`}
-              disabled={deletingId}
+              disabled={isDeleting}
               onDelete={() =>
                 confirmToast({
                   message: t.library.products.brands.confirmDelete,
+                  detail: brand.name,
                   confirmLabel: t.common.delete,
                   cancelLabel: t.common.cancel,
-                  onConfirm: () => startDelete(() => deleteProductBrand(brand.id)),
+                  onConfirm: () =>
+                    startDelete(async () => {
+                      await deleteProductBrand(brand.id);
+                      queryClient.invalidateQueries({ queryKey: ["product-brands"] });
+                    }),
                   successMessage: t.common.deleted,
                 })
               }

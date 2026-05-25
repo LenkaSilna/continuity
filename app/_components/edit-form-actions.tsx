@@ -16,7 +16,7 @@ export function EditFormActions({
   deleteLabel: string;
 }) {
   return (
-    <div className="safe-bottom sticky bottom-0 -mx-4 flex items-center gap-2 border-t border-zinc-200 bg-white/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 dark:border-zinc-800 dark:bg-zinc-950/90">
+    <div className="safe-bottom sticky bottom-0 -mx-4 flex items-center gap-2 border-t border-zinc-200 bg-[var(--background)]/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 dark:border-zinc-800 ">
       <button
         type="submit"
         disabled={isPending}

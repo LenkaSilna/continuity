@@ -1,7 +1,4 @@
-"use server";
-
-import { revalidatePath } from "next/cache";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { supabase } from "@/lib/supabase/browser";
 import { GENDERS } from "@/lib/skin-types";
 import type { Gender, Lifestyle } from "@/lib/types";
 
@@ -17,14 +14,8 @@ export type ProfileFormState = {
   ok?: boolean;
 };
 
-export async function saveProfile(
-  _prev: ProfileFormState,
-  formData: FormData,
-): Promise<ProfileFormState> {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export async function saveProfile(formData: FormData): Promise<ProfileFormState> {
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { errorCode: "unauthenticated" };
 
   const name = String(formData.get("name") ?? "").trim() || null;
@@ -35,7 +26,6 @@ export async function saveProfile(
     ? (genderRaw as Gender)
     : null;
 
-  // Accept presets + user-added custom strings. Trim, dedupe, cap length.
   const skinTypes = Array.from(
     new Set(
       formData
@@ -52,9 +42,7 @@ export async function saveProfile(
       : 0;
 
   const lifestyleRaw = String(formData.get("lifestyle") ?? "");
-  const lifestyle: Lifestyle = (LIFESTYLES as readonly string[]).includes(
-    lifestyleRaw,
-  )
+  const lifestyle: Lifestyle = (LIFESTYLES as readonly string[]).includes(lifestyleRaw)
     ? (lifestyleRaw as Lifestyle)
     : "sedentary";
 
@@ -69,8 +57,5 @@ export async function saveProfile(
   });
 
   if (error) return { errorCode: "generic" };
-
-  revalidatePath("/dashboard");
-  revalidatePath("/profile");
   return { ok: true };
 }

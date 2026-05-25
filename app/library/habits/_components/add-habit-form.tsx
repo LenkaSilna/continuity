@@ -1,6 +1,5 @@
-"use client";
-
 import { useActionState, useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { addHabit, type ActionState } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { showSuccess } from "@/lib/toast";
@@ -12,14 +11,21 @@ const initialState: ActionState = {};
 
 export function AddHabitForm() {
   const { t } = useI18n();
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [state, formAction, isPending] = useActionState(addHabit, initialState);
+  const [state, formAction, isPending] = useActionState(
+    (_: ActionState, fd: FormData) => addHabit(fd),
+    initialState,
+  );
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (state.ok) {
       showSuccess(t.common.saved);
       formRef.current?.reset();
+      queryClient.invalidateQueries({ queryKey: ["habits"] });
+      queryClient.invalidateQueries({ queryKey: ["routine-data"] });
+      queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
     }
   }, [state]);
 

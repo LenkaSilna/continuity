@@ -1,6 +1,5 @@
-"use client";
-
 import { useActionState, useEffect, useId, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { addSupplement, type ActionState } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { showSuccess } from "@/lib/toast";
@@ -19,8 +18,12 @@ export function AddSupplementForm({
   brands: SupplementBrand[];
 }) {
   const { t } = useI18n();
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [state, formAction, isPending] = useActionState(addSupplement, initialState);
+  const [state, formAction, isPending] = useActionState(
+    (_: ActionState, fd: FormData) => addSupplement(fd),
+    initialState,
+  );
   const formRef = useRef<HTMLFormElement>(null);
   const brandListId = useId();
 
@@ -28,8 +31,11 @@ export function AddSupplementForm({
     if (state.ok) {
       showSuccess(t.common.saved);
       formRef.current?.reset();
+      queryClient.invalidateQueries({ queryKey: ["supplements"] });
+      queryClient.invalidateQueries({ queryKey: ["routine-data"] });
+      queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
     }
-  }, [state]);
+  }, [state.ok]);
 
   const errorMessage = (() => {
     if (state.errorCode === "name_required") return t.library.supplements.errors.nameRequired;

@@ -1,7 +1,6 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useId, useTransition } from "react";
+import { useState, useId, useTransition } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { deleteSupplement, updateSupplement, type ActionState } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
@@ -9,8 +8,6 @@ import { showSuccess } from "@/lib/toast";
 import { FormField, fieldInputCn } from "@/app/_components/form-field";
 import { EditFormActions } from "@/app/_components/edit-form-actions";
 import type { Supplement, SupplementBrand, SupplementType } from "@/lib/types";
-
-const initialState: ActionState = {};
 
 export function EditSupplementForm({
   supplement,
@@ -22,19 +19,29 @@ export function EditSupplementForm({
   brands: SupplementBrand[];
 }) {
   const { t } = useI18n();
-  const router = useRouter();
-  const boundUpdate = updateSupplement.bind(null, supplement.id);
-  const [state, formAction, isPending] = useActionState(boundUpdate, initialState);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [state, setState] = useState<ActionState>({});
+  const [isPending, startSave] = useTransition();
   const [isDeleting, startDelete] = useTransition();
   const brandListId = useId();
   const currentBrandName = brands.find((b) => b.id === supplement.brand_id)?.name ?? "";
 
-  useEffect(() => {
-    if (state.ok) {
-      showSuccess(t.common.saved);
-      router.push("/library/supplements");
-    }
-  }, [state.ok, router]);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    startSave(async () => {
+      const result = await updateSupplement(supplement.id, formData);
+      setState(result);
+      if (result.ok) {
+        showSuccess(t.common.saved);
+        queryClient.invalidateQueries({ queryKey: ["supplements"] });
+        queryClient.invalidateQueries({ queryKey: ["routine-data"] });
+        queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
+        navigate({ to: "/library/supplements" });
+      }
+    });
+  };
 
   const errorMessage = (() => {
     if (state.errorCode === "name_required") return t.library.supplements.errors.nameRequired;
@@ -43,7 +50,7 @@ export function EditSupplementForm({
   })();
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <FormField label={`${t.library.supplements.form.name} ${t.common.requiredField}`}>
         <input
           name="name"
@@ -132,13 +139,16 @@ export function EditSupplementForm({
         onDelete={() =>
           confirmToast({
             message: t.library.supplements.card.confirmDelete,
+            detail: supplement.name,
             confirmLabel: t.common.delete,
             cancelLabel: t.common.cancel,
             onConfirm: () =>
               startDelete(async () => {
                 await deleteSupplement(supplement.id);
-                router.push("/library/supplements");
-                router.refresh();
+                queryClient.invalidateQueries({ queryKey: ["supplements"] });
+        queryClient.invalidateQueries({ queryKey: ["routine-data"] });
+        queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
+                navigate({ to: "/library/supplements" });
               }),
             successMessage: t.common.deleted,
           })

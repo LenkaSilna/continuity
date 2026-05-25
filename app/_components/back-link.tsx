@@ -1,7 +1,3 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-
 export function BackLink({
   fallback,
   label,
@@ -9,12 +5,10 @@ export function BackLink({
   fallback: string;
   label: string;
 }) {
-  const router = useRouter();
-
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (window.history.length > 1) {
       e.preventDefault();
-      router.back();
+      window.history.back();
     }
   };
 

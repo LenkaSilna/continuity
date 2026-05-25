@@ -1,7 +1,5 @@
-"use client";
-
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { setAccent, setModule, setTheme } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { accentHex, ACCENTS, THEMES } from "@/lib/theme";
@@ -38,7 +36,7 @@ export function SettingsForm({
   >;
 }) {
   const { t } = useI18n();
-  const router = useRouter();
+  const queryClient = useQueryClient();
   const [isApplying, startApply] = useTransition();
 
   const apply = (fn: () => Promise<{ error?: string }>) => {
@@ -48,7 +46,9 @@ export function SettingsForm({
         showError(t.settings.errors.generic);
       } else {
         showSuccess(t.settings.saved);
-        router.refresh();
+        queryClient.invalidateQueries({ queryKey: ["settings-profile"] });
+        queryClient.invalidateQueries({ queryKey: ["module-flags"] });
+        queryClient.invalidateQueries({ queryKey: ["profile"] });
       }
     });
   };
@@ -62,9 +62,7 @@ export function SettingsForm({
         </h2>
 
         <fieldset className="space-y-2" disabled={isApplying}>
-          <legend className="text-xs font-medium">
-            {t.settings.appearance.theme}
-          </legend>
+          <legend className="text-xs font-medium">{t.settings.appearance.theme}</legend>
           <div className="grid grid-cols-2 gap-2">
             {THEMES.map((mode) => {
               const active = profile.theme === mode;
@@ -89,9 +87,7 @@ export function SettingsForm({
         </fieldset>
 
         <fieldset className="space-y-2" disabled={isApplying}>
-          <legend className="text-xs font-medium">
-            {t.settings.appearance.accent}
-          </legend>
+          <legend className="text-xs font-medium">{t.settings.appearance.accent}</legend>
           <div className="grid grid-cols-3 gap-2">
             {ACCENTS.map((color) => {
               const active = profile.accent === color;
@@ -136,12 +132,8 @@ export function SettingsForm({
             return (
               <li key={key} className="flex items-start gap-3 py-3">
                 <div className="min-w-0 flex-1 space-y-0.5">
-                  <p className="text-sm font-medium">
-                    {t.settings.modules.labels[key]}
-                  </p>
-                  <p className="text-xs text-zinc-500">
-                    {t.settings.modules.descriptions[key]}
-                  </p>
+                  <p className="text-sm font-medium">{t.settings.modules.labels[key]}</p>
+                  <p className="text-xs text-zinc-500">{t.settings.modules.descriptions[key]}</p>
                 </div>
                 <Toggle
                   checked={!!enabled}

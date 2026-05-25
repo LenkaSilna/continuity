@@ -1,6 +1,5 @@
-"use client";
-
 import { useTransition } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { deleteHabit } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
@@ -10,6 +9,7 @@ import type { Habit } from "@/lib/types";
 
 export function HabitsList({ habits }: { habits: Habit[] }) {
   const { t } = useI18n();
+  const queryClient = useQueryClient();
   const [isPending, start] = useTransition();
 
   if (habits.length === 0) {
@@ -39,9 +39,16 @@ export function HabitsList({ habits }: { habits: Habit[] }) {
             onDelete={() =>
               confirmToast({
                 message: t.library.habits.card.confirmDelete,
+                detail: h.name,
                 confirmLabel: t.common.delete,
                 cancelLabel: t.common.cancel,
-                onConfirm: () => start(() => deleteHabit(h.id)),
+                onConfirm: () =>
+                  start(async () => {
+                    await deleteHabit(h.id);
+                    queryClient.invalidateQueries({ queryKey: ["habits"] });
+                    queryClient.invalidateQueries({ queryKey: ["routine-data"] });
+                    queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
+                  }),
                 successMessage: t.common.deleted,
               })
             }

@@ -1,9 +1,9 @@
-"use client";
-
-import { useMemo, useState, useTransition } from "react";
-import Link from "next/link";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
+import { TrashIcon } from "@/app/_components/icons";
 import type {
   Habit,
   ItemKind,
@@ -166,10 +166,18 @@ export function SlotPanel({
     usedIds: Set<string>;
   }) {
     const sectionKey = KIND_TO_LIBRARY[kind];
+    const queryClient = useQueryClient();
     const [pickerOpen, setPickerOpen] = useState(false);
     const [isPending, start] = useTransition();
+    const pickerRef = useRef<HTMLDivElement>(null);
     const libraryEmpty = library.length === 0;
     const available = library.filter((item) => !usedIds.has(item.id));
+
+    useEffect(() => {
+      if (pickerOpen) {
+        pickerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    }, [pickerOpen]);
 
     return (
       <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
@@ -181,7 +189,12 @@ export function SlotPanel({
             <button
               type="button"
               onClick={() => setPickerOpen((v) => !v)}
-              className="rounded-md border border-zinc-300 px-2 py-1 text-xs text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+              className={[
+                "rounded-md border px-2 py-1 text-xs transition",
+                pickerOpen
+                  ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+                  : "border-zinc-300 text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900",
+              ].join(" ")}
             >
               {t.routine.add[sectionKey]}
             </button>
@@ -192,7 +205,7 @@ export function SlotPanel({
           <p className="text-xs text-zinc-500">
             {t.routine.libraryEmpty[sectionKey]}{" "}
             <Link
-              href={`/library/${sectionKey}`}
+              to={`/library/${sectionKey}`}
               className="underline underline-offset-2 hover:text-zinc-700 dark:hover:text-zinc-300"
             >
               {t.routine.libraryEmptyLink}
@@ -219,19 +232,24 @@ export function SlotPanel({
                   type="button"
                   aria-label={`Remove ${row.label}`}
                   disabled={isPending}
-                  onClick={() => {
+                  onClick={() =>
                     confirmToast({
                       message: t.routine.card.confirmRemove,
+                      detail: row.label,
                       confirmLabel: t.common.delete,
                       cancelLabel: t.common.cancel,
                       onConfirm: () =>
-                        start(() => deleteRoutineItem(row.routineId)),
+                        start(async () => {
+                          await deleteRoutineItem(row.routineId);
+                          queryClient.invalidateQueries({ queryKey: ["routine-data"] });
+                          queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
+                        }),
                       successMessage: t.common.deleted,
-                    });
-                  }}
-                  className="rounded px-2 py-0.5 text-xs text-zinc-500 hover:bg-zinc-200 hover:text-zinc-900 disabled:opacity-50 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+                    })
+                  }
+                  className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-zinc-300 text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-900"
                 >
-                  ×
+                  <TrashIcon />
                 </button>
               </li>
             ))}
@@ -239,7 +257,7 @@ export function SlotPanel({
         )}
 
         {pickerOpen && !libraryEmpty && (
-          <div className="mt-3 rounded-md border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950">
+          <div ref={pickerRef} className="mt-3 rounded-md border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950">
             <div className="mb-2 flex items-center justify-between gap-2">
               <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
                 {t.routine.picker.title}
@@ -266,6 +284,8 @@ export function SlotPanel({
                       onClick={() =>
                         start(async () => {
                           await addRoutineItem(slot, kind, item.id);
+                          queryClient.invalidateQueries({ queryKey: ["routine-data"] });
+                          queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
                           setPickerOpen(false);
                         })
                       }

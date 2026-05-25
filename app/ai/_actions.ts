@@ -1,14 +1,9 @@
-"use server";
-
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { supabase } from "@/lib/supabase/browser";
 
 export async function savePromptOverride(
   promptType: string,
   text: string,
 ): Promise<{ error?: string }> {
-  const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "Not signed in" };
   const { error } = await supabase.from("prompt_overrides").upsert(
     { prompt_type: promptType, saved_text: text },
     { onConflict: "user_id,prompt_type" },
@@ -19,9 +14,6 @@ export async function savePromptOverride(
 export async function deletePromptOverride(
   promptType: string,
 ): Promise<{ error?: string }> {
-  const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "Not signed in" };
   const { error } = await supabase
     .from("prompt_overrides")
     .delete()

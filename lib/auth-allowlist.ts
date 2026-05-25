@@ -1,16 +1,16 @@
 export function getAllowedEmails(): string[] {
-  return (process.env.ALLOWED_EMAILS ?? "")
+  return (import.meta.env.VITE_ALLOWED_EMAILS ?? "")
     .split(",")
-    .map((s) => s.trim().toLowerCase())
+    .map((s: string) => s.trim().toLowerCase())
     .filter(Boolean);
 }
 
 export function isEmailAllowed(email: string | null | undefined): boolean {
   const allowed = getAllowedEmails();
   if (allowed.length === 0) {
-    if (process.env.NODE_ENV === "production") {
+    if (import.meta.env.PROD) {
       console.error(
-        "[auth-allowlist] ALLOWED_EMAILS is not set — access denied. Set ALLOWED_EMAILS env var.",
+        "[auth-allowlist] VITE_ALLOWED_EMAILS is not set — access denied. Set VITE_ALLOWED_EMAILS env var.",
       );
       return false;
     }

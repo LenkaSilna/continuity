@@ -1,5 +1,3 @@
-"use client";
-
 type LibraryChipProps = {
   label: string;
   onDelete: () => void;

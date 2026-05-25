@@ -1,7 +1,6 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useTransition } from "react";
+import { useState, useTransition } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { deleteHabit, updateHabit, type ActionState } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
@@ -10,21 +9,29 @@ import { FormField, fieldInputCn } from "@/app/_components/form-field";
 import { EditFormActions } from "@/app/_components/edit-form-actions";
 import type { Habit } from "@/lib/types";
 
-const initialState: ActionState = {};
-
 export function EditHabitForm({ habit }: { habit: Habit }) {
   const { t } = useI18n();
-  const router = useRouter();
-  const boundUpdate = updateHabit.bind(null, habit.id);
-  const [state, formAction, isPending] = useActionState(boundUpdate, initialState);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [state, setState] = useState<ActionState>({});
+  const [isPending, startSave] = useTransition();
   const [isDeleting, startDelete] = useTransition();
 
-  useEffect(() => {
-    if (state.ok) {
-      showSuccess(t.common.saved);
-      router.push("/library/habits");
-    }
-  }, [state.ok, router]);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    startSave(async () => {
+      const result = await updateHabit(habit.id, formData);
+      setState(result);
+      if (result.ok) {
+        showSuccess(t.common.saved);
+        queryClient.invalidateQueries({ queryKey: ["habits"] });
+        queryClient.invalidateQueries({ queryKey: ["routine-data"] });
+        queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
+        navigate({ to: "/library/habits" });
+      }
+    });
+  };
 
   const errorMessage = (() => {
     if (state.errorCode === "name_required") return t.library.habits.errors.nameRequired;
@@ -33,7 +40,7 @@ export function EditHabitForm({ habit }: { habit: Habit }) {
   })();
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <FormField label={`${t.library.habits.form.name} ${t.common.requiredField}`}>
         <input
           name="name"
@@ -60,13 +67,16 @@ export function EditHabitForm({ habit }: { habit: Habit }) {
         onDelete={() =>
           confirmToast({
             message: t.library.habits.card.confirmDelete,
+            detail: habit.name,
             confirmLabel: t.common.delete,
             cancelLabel: t.common.cancel,
             onConfirm: () =>
               startDelete(async () => {
                 await deleteHabit(habit.id);
-                router.push("/library/habits");
-                router.refresh();
+                queryClient.invalidateQueries({ queryKey: ["habits"] });
+        queryClient.invalidateQueries({ queryKey: ["routine-data"] });
+        queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
+                navigate({ to: "/library/habits" });
               }),
             successMessage: t.common.deleted,
           })

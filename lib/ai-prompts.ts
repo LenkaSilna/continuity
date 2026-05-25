@@ -9,7 +9,6 @@ import type {
   TimeOfDay,
 } from "./types";
 import type { Locale } from "./i18n/messages";
-import { getLocale } from "./i18n/server";
 
 export type PromptType =
   | "skincare"
@@ -1012,8 +1011,8 @@ async function buildWeekly(supabase: SupabaseClient, locale: Locale): Promise<st
 export async function buildCustomPrompt(
   supabase: SupabaseClient,
   customPrompt: { question: string; data_blocks: DataBlock[] },
+  locale: Locale,
 ): Promise<string> {
-  const locale = await getLocale();
   const s = STRINGS[locale];
   const sl = SLOT_LABEL[locale];
   const il = INTENSITY_LABEL[locale];
@@ -1215,8 +1214,8 @@ export async function buildCustomPrompt(
 export async function buildPrompt(
   supabase: SupabaseClient,
   type: PromptType,
+  locale: Locale,
 ): Promise<string> {
-  const locale = await getLocale();
   switch (type) {
     case "skincare":
       return buildSkincare(supabase, locale);

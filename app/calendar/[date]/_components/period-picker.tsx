@@ -1,6 +1,5 @@
-"use client";
-
-import { useOptimistic, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { setCycle } from "../../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import type { CycleIntensity } from "@/lib/types";
@@ -20,8 +19,15 @@ export function PeriodPicker({
   intensity: CycleIntensity | null;
 }) {
   const { t } = useI18n();
-  const [isPending, start] = useTransition();
-  const [optimisticIntensity, setOptimisticIntensity] = useOptimistic(intensity);
+  const queryClient = useQueryClient();
+  const [localIntensity, setLocalIntensity] = useState(intensity);
+  const [isPending, setIsPending] = useState(false);
+  const serverRef = useRef(intensity);
+
+  useEffect(() => {
+    serverRef.current = intensity;
+    setLocalIntensity(intensity);
+  }, [intensity]);
 
   const options: { value: CycleIntensity | null; label: string }[] = [
     { value: null, label: t.calendar.day.period.none },
@@ -30,6 +36,21 @@ export function PeriodPicker({
     { value: "heavy", label: t.calendar.day.period.heavy },
   ];
 
+  const handle = async (value: CycleIntensity | null) => {
+    if (isPending) return;
+    setLocalIntensity(value);
+    setIsPending(true);
+    const result = await setCycle(date, value);
+    setIsPending(false);
+    if (result?.error) {
+      showError(t.calendar.errors.generic);
+      setLocalIntensity(serverRef.current);
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["calendar-day", date] });
+      queryClient.invalidateQueries({ queryKey: ["calendar-data"] });
+    }
+  };
+
   return (
     <section className="space-y-2 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
@@ -37,19 +58,13 @@ export function PeriodPicker({
       </h2>
       <div className="flex flex-wrap gap-2">
         {options.map(({ value, label }) => {
-          const active = optimisticIntensity === value;
+          const active = localIntensity === value;
           return (
             <button
               key={value ?? "none"}
               type="button"
               disabled={isPending}
-              onClick={() =>
-                start(async () => {
-                  setOptimisticIntensity(value);
-                  const result = await setCycle(date, value);
-                  if (result?.error) showError(t.calendar.errors.generic);
-                })
-              }
+              onClick={() => handle(value)}
               aria-pressed={active}
               className={[
                 "inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm transition disabled:opacity-50",

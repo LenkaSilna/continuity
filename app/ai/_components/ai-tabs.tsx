@@ -1,8 +1,5 @@
-"use client";
-
 import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { AddDashedButton } from "@/app/_components/add-dashed-button";
 
 type PromptType = string;
@@ -32,7 +29,7 @@ type Props = {
 
 export function AiTabs({ predefined, custom, labels }: Props) {
   const [tab, setTab] = useState<"predefined" | "custom">("predefined");
-  const router = useRouter();
+  const navigate = useNavigate();
 
   return (
     <div className="space-y-4">
@@ -61,7 +58,8 @@ export function AiTabs({ predefined, custom, labels }: Props) {
           {predefined.map(({ type, title, desc }) => (
             <li key={type}>
               <Link
-                href={`/ai/${type}`}
+                to="/ai/$type"
+                params={{ type }}
                 className="flex items-start justify-between gap-3 rounded-lg border border-zinc-200 p-4 transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
               >
                 <div className="min-w-0 space-y-1">
@@ -82,7 +80,7 @@ export function AiTabs({ predefined, custom, labels }: Props) {
       {/* My prompts tab */}
       {tab === "custom" && (
         <div className="space-y-2">
-          <AddDashedButton onClick={() => router.push("/ai/custom/new")}>
+          <AddDashedButton onClick={() => navigate({ to: "/ai/custom/new" })}>
             + {labels.addNew}
           </AddDashedButton>
           {custom.length === 0 ? (
@@ -92,7 +90,8 @@ export function AiTabs({ predefined, custom, labels }: Props) {
               {custom.map((p) => (
                 <li key={p.id}>
                   <Link
-                    href={`/ai/custom/${p.id}`}
+                    to="/ai/custom/$id"
+                    params={{ id: p.id }}
                     className="flex items-start justify-between gap-3 rounded-lg border border-zinc-200 p-4 transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
                   >
                     <div className="min-w-0 space-y-1">

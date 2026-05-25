@@ -435,7 +435,7 @@ const cs = {
       questionLabel: "Otázka / instrukce",
       questionPlaceholder: "Co chceš od AI zjistit nebo analyzovat...",
       save: "Uložit prompt",
-      delete: "Smazat prompt",
+      delete: "Smazat",
       confirmDelete: "Opravdu smazat tento prompt? Akce je nevratná.",
       noCustom: "Zatím žádné vlastní prompty.",
       blocks: {
@@ -957,7 +957,7 @@ const en: Messages = {
       questionLabel: "Question / instruction",
       questionPlaceholder: "What do you want the AI to analyse or answer...",
       save: "Save prompt",
-      delete: "Delete prompt",
+      delete: "Delete",
       confirmDelete: "Delete this prompt? This cannot be undone.",
       noCustom: "No custom prompts yet.",
       blocks: {

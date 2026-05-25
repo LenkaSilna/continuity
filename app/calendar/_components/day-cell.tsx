@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import type { CycleIntensity } from "@/lib/types";
 import { moodColor } from "@/lib/calendar";
 
@@ -33,7 +33,8 @@ export function DayCell({
 
   return (
     <Link
-      href={`/calendar/${iso}`}
+      to="/calendar/$date"
+      params={{ date: iso }}
       aria-label={iso}
       className={[
         "relative flex flex-col rounded-md border text-xs transition",

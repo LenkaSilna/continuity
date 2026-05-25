@@ -1,7 +1,4 @@
-"use client";
-
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n/client";
 import { showError, showSuccess } from "@/lib/toast";
 import { savePromptOverride, deletePromptOverride } from "../_actions";
@@ -11,6 +8,7 @@ type Props = {
   promptType?: string;
   hasOverride?: boolean;
   generatedText?: string;
+  onRegenerate?: () => void;
 };
 
 export function PromptEditor({
@@ -18,9 +16,9 @@ export function PromptEditor({
   promptType,
   hasOverride = false,
   generatedText,
+  onRegenerate,
 }: Props) {
   const { t } = useI18n();
-  const router = useRouter();
   const [text, setText] = useState(initialText);
   const [copiedAt, setCopiedAt] = useState<number | null>(null);
   const [isRegen, startRegen] = useTransition();
@@ -42,9 +40,9 @@ export function PromptEditor({
     }
   };
 
-  const onRegenerate = () => {
+  const handleRegenerate = () => {
     startRegen(() => {
-      router.refresh();
+      onRegenerate?.();
     });
   };
 
@@ -65,7 +63,7 @@ export function PromptEditor({
         showError(t.ai.detail.saveError);
       } else {
         setText(generatedText);
-        router.refresh();
+        onRegenerate?.();
       }
     });
   };
@@ -128,7 +126,7 @@ export function PromptEditor({
         className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 font-mono text-xs leading-relaxed dark:border-zinc-700 dark:bg-zinc-900"
       />
 
-      <div className="safe-bottom sticky bottom-0 -mx-4 flex flex-col gap-2 border-t border-zinc-200 bg-white/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 dark:border-zinc-800 dark:bg-zinc-950/90">
+      <div className="safe-bottom sticky bottom-0 -mx-4 flex flex-col gap-2 border-t border-zinc-200 bg-[var(--background)]/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 dark:border-zinc-800 ">
         <div className="flex gap-2">
           <button
             type="button"
@@ -142,7 +140,7 @@ export function PromptEditor({
           {promptType && (
             <button
               type="button"
-              onClick={onRegenerate}
+              onClick={handleRegenerate}
               disabled={isRegen}
               aria-label={t.ai.detail.regenerate}
               className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-md border border-zinc-300 px-4 text-sm text-zinc-700 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
