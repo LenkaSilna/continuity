@@ -5,6 +5,7 @@ import { deleteHabit, updateHabit, type ActionState } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
 import { showSuccess } from "@/lib/toast";
+import { withDelete } from "@/lib/with-delete";
 import { FormField, fieldInputCn } from "@/app/_components/form-field";
 import { EditFormActions } from "@/app/_components/edit-form-actions";
 import type { Habit } from "@/lib/types";
@@ -71,14 +72,15 @@ export function EditHabitForm({ habit }: { habit: Habit }) {
             confirmLabel: t.common.delete,
             cancelLabel: t.common.cancel,
             onConfirm: () =>
-              startDelete(async () => {
-                await deleteHabit(habit.id);
-                queryClient.invalidateQueries({ queryKey: ["habits"] });
-        queryClient.invalidateQueries({ queryKey: ["routine-data"] });
-        queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
-                navigate({ to: "/library/habits" });
+              withDelete({
+                action: () => deleteHabit(habit.id),
+                start: startDelete,
+                queryClient,
+                invalidateKeys: [["habits"], ["routine-data"], ["calendar-day"]],
+                navigate: () => navigate({ to: "/library/habits" }),
+                errorMessage: t.common.errorGeneric,
+                successMessage: t.common.deleted,
               }),
-            successMessage: t.common.deleted,
           })
         }
         saveLabel={t.common.save}

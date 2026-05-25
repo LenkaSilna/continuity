@@ -175,3 +175,9 @@ export type CustomPrompt = {
   created_at: string;
   updated_at: string;
 };
+
+export type ActionState = {
+  errorCode?: string;
+  errorDetail?: string;
+  ok?: boolean;
+};

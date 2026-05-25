@@ -5,6 +5,7 @@ import { deleteProduct, updateProduct, type ActionState } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
 import { showSuccess } from "@/lib/toast";
+import { withDelete } from "@/lib/with-delete";
 import { FormField, fieldInputCn } from "@/app/_components/form-field";
 import { EditFormActions } from "@/app/_components/edit-form-actions";
 import type { Product, ProductBrand, ProductType } from "@/lib/types";
@@ -130,14 +131,15 @@ export function EditProductForm({
             confirmLabel: t.common.delete,
             cancelLabel: t.common.cancel,
             onConfirm: () =>
-              startDelete(async () => {
-                await deleteProduct(product.id);
-                queryClient.invalidateQueries({ queryKey: ["products"] });
-        queryClient.invalidateQueries({ queryKey: ["routine-data"] });
-        queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
-                navigate({ to: "/library/products" });
+              withDelete({
+                action: () => deleteProduct(product.id),
+                start: startDelete,
+                queryClient,
+                invalidateKeys: [["products"], ["routine-data"], ["calendar-day"]],
+                navigate: () => navigate({ to: "/library/products" }),
+                errorMessage: t.common.errorGeneric,
+                successMessage: t.common.deleted,
               }),
-            successMessage: t.common.deleted,
           })
         }
         saveLabel={t.common.save}

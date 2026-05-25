@@ -29,9 +29,10 @@ export function RoutineChecklist({
   const serverRef = useRef(logged);
 
   useEffect(() => {
+    if (pendingKeys.size > 0) return;
     serverRef.current = logged;
     setLocalLogged(logged);
-  }, [logged]);
+  }, [logged, pendingKeys]);
 
   const order: TimeOfDay[] = ["morning", "afternoon", "evening"];
   const slotLabels = t.routine.slots;
@@ -59,7 +60,12 @@ export function RoutineChecklist({
     });
     if (result?.error) {
       showError(t.calendar.errors.generic);
-      setLocalLogged(serverRef.current);
+      setLocalLogged((prev) => {
+        const next = new Set(prev);
+        if (serverRef.current.has(key)) next.add(key);
+        else next.delete(key);
+        return next;
+      });
     } else {
       queryClient.invalidateQueries({ queryKey: ["calendar-day", date] });
       queryClient.invalidateQueries({ queryKey: ["calendar-data"] });

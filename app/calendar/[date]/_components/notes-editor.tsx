@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { setNotes } from "../../_actions";
 import { useI18n } from "@/lib/i18n/client";
+import { showError } from "@/lib/toast";
 
 export function NotesEditor({
   date,
@@ -21,7 +22,11 @@ export function NotesEditor({
     if (value === lastSaved.current) return;
     const handle = setTimeout(() => {
       start(async () => {
-        await setNotes(date, value);
+        const result = await setNotes(date, value);
+        if (result.error) {
+          showError(t.calendar.errors.generic);
+          return;
+        }
         lastSaved.current = value;
         setSavedAt(Date.now());
         queryClient.invalidateQueries({ queryKey: ["calendar-day", date] });

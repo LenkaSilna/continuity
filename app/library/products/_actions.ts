@@ -1,11 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/browser";
+import type { ActionState } from "@/lib/types";
 
-export type ActionState = {
-  errorCode?: "name_required" | "type_exists" | "brand_exists" | "generic";
-  errorDetail?: string;
-  ok?: boolean;
-};
+export type { ActionState } from "@/lib/types";
 
 // ─── product types ───────────────────────────────────────────────
 
@@ -28,8 +25,10 @@ export async function addProductType(formData: FormData): Promise<ActionState> {
   return { ok: true };
 }
 
-export async function deleteProductType(id: string): Promise<void> {
-  await supabase.from("product_types").delete().eq("id", id);
+export async function deleteProductType(id: string): Promise<ActionState> {
+  const { error } = await supabase.from("product_types").delete().eq("id", id);
+  if (error) return { errorCode: "generic", errorDetail: error.message };
+  return { ok: true };
 }
 
 // ─── product brands ──────────────────────────────────────────────
@@ -47,8 +46,10 @@ export async function addProductBrand(formData: FormData): Promise<ActionState> 
   return { ok: true };
 }
 
-export async function deleteProductBrand(id: string): Promise<void> {
-  await supabase.from("product_brands").delete().eq("id", id);
+export async function deleteProductBrand(id: string): Promise<ActionState> {
+  const { error } = await supabase.from("product_brands").delete().eq("id", id);
+  if (error) return { errorCode: "generic", errorDetail: error.message };
+  return { ok: true };
 }
 
 async function resolveProductBrandId(
@@ -124,6 +125,8 @@ export async function updateProduct(
   return { ok: true };
 }
 
-export async function deleteProduct(id: string): Promise<void> {
-  await supabase.from("products").delete().eq("id", id);
+export async function deleteProduct(id: string): Promise<ActionState> {
+  const { error } = await supabase.from("products").delete().eq("id", id);
+  if (error) return { errorCode: "generic", errorDetail: error.message };
+  return { ok: true };
 }

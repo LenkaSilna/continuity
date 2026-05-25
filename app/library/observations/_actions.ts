@@ -1,10 +1,7 @@
 import { supabase } from "@/lib/supabase/browser";
+import type { ActionState } from "@/lib/types";
 
-export type ActionState = {
-  errorCode?: "name_required" | "exists" | "generic";
-  errorDetail?: string;
-  ok?: boolean;
-};
+export type { ActionState } from "@/lib/types";
 
 function readForm(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
@@ -49,6 +46,8 @@ export async function updateObservation(
   return { ok: true };
 }
 
-export async function deleteObservation(id: string): Promise<void> {
-  await supabase.from("tags").delete().eq("id", id);
+export async function deleteObservation(id: string): Promise<ActionState> {
+  const { error } = await supabase.from("tags").delete().eq("id", id);
+  if (error) return { errorCode: "generic", errorDetail: error.message };
+  return { ok: true };
 }

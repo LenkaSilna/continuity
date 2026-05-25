@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { deleteObservation } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
+import { withDelete } from "@/lib/with-delete";
 import { EmptyState } from "@/app/_components/empty-state";
 import { ListItemActions } from "@/app/_components/list-item-actions";
 import type { Tag } from "@/lib/types";
@@ -48,12 +49,14 @@ export function ObservationsList({ tags }: { tags: Tag[] }) {
                 confirmLabel: t.common.delete,
                 cancelLabel: t.common.cancel,
                 onConfirm: () =>
-                  start(async () => {
-                    await deleteObservation(tag.id);
-                    queryClient.invalidateQueries({ queryKey: ["observations"] });
-                    queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
+                  withDelete({
+                    action: () => deleteObservation(tag.id),
+                    start,
+                    queryClient,
+                    invalidateKeys: [["observations"], ["calendar-day"]],
+                    errorMessage: t.common.errorGeneric,
+                    successMessage: t.common.deleted,
                   }),
-                successMessage: t.common.deleted,
               })
             }
           />

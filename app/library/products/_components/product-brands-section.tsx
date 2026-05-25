@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { addProductBrand, deleteProductBrand, type ActionState } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
+import { withDelete } from "@/lib/with-delete";
 import { CollapsibleSection } from "@/app/_components/collapsible-section";
 import { EmptyState } from "@/app/_components/empty-state";
 import { LibraryChip } from "@/app/_components/library-chip";
@@ -53,11 +54,14 @@ export function ProductBrandsSection({ brands }: { brands: ProductBrand[] }) {
                   confirmLabel: t.common.delete,
                   cancelLabel: t.common.cancel,
                   onConfirm: () =>
-                    startDelete(async () => {
-                      await deleteProductBrand(brand.id);
-                      queryClient.invalidateQueries({ queryKey: ["product-brands"] });
+                    withDelete({
+                      action: () => deleteProductBrand(brand.id),
+                      start: startDelete,
+                      queryClient,
+                      invalidateKeys: [["product-brands"]],
+                      errorMessage: t.common.errorGeneric,
+                      successMessage: t.common.deleted,
                     }),
-                  successMessage: t.common.deleted,
                 })
               }
             />

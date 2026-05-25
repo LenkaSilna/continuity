@@ -3,6 +3,7 @@ import { useParams, Link } from "@tanstack/react-router";
 import { supabase } from "@/lib/supabase/browser";
 import { useI18n } from "@/lib/i18n/client";
 import { TopNav } from "@/app/_components/top-nav";
+import { ErrorState } from "@/app/_components/error-state";
 import { EditSupplementForm } from "@/app/library/supplements/_components/edit-supplement-form";
 import type { Supplement, SupplementBrand, SupplementType } from "@/lib/types";
 
@@ -10,39 +11,46 @@ export function SupplementDetailPage() {
   const { id } = useParams({ from: "/_protected/library/supplements/$id" });
   const { t } = useI18n();
 
-  const { data: supplement, isLoading } = useQuery({
+  const { data: supplement, isLoading, isError } = useQuery({
     queryKey: ["supplement", id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("supplements")
         .select("*")
         .eq("id", id)
         .maybeSingle<Supplement>();
+      if (error) throw error;
       return data as Supplement | null;
     },
   });
 
-  const { data: types = [] } = useQuery({
+  const { data: types = [], isError: isTypesError } = useQuery({
     queryKey: ["supplement-types"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("supplement_types")
         .select("*")
         .order("position", { ascending: true });
+      if (error) throw error;
       return (data ?? []) as SupplementType[];
     },
   });
 
-  const { data: brands = [] } = useQuery({
+  const { data: brands = [], isError: isBrandsError } = useQuery({
     queryKey: ["supplement-brands"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("supplement_brands")
         .select("*")
         .order("name", { ascending: true });
+      if (error) throw error;
       return (data ?? []) as SupplementBrand[];
     },
   });
+
+  if (isError || isTypesError || isBrandsError) {
+    return <ErrorState message={t.common.errorGeneric} />;
+  }
 
   if (!isLoading && !supplement) {
     return (

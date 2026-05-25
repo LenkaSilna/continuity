@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { addSupplementBrand, deleteSupplementBrand, type ActionState } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
+import { withDelete } from "@/lib/with-delete";
 import { CollapsibleSection } from "@/app/_components/collapsible-section";
 import { EmptyState } from "@/app/_components/empty-state";
 import { LibraryChip } from "@/app/_components/library-chip";
@@ -53,11 +54,14 @@ export function SupplementBrandsSection({ brands }: { brands: SupplementBrand[] 
                   confirmLabel: t.common.delete,
                   cancelLabel: t.common.cancel,
                   onConfirm: () =>
-                    startDelete(async () => {
-                      await deleteSupplementBrand(brand.id);
-                      queryClient.invalidateQueries({ queryKey: ["supplement-brands"] });
+                    withDelete({
+                      action: () => deleteSupplementBrand(brand.id),
+                      start: startDelete,
+                      queryClient,
+                      invalidateKeys: [["supplement-brands"]],
+                      errorMessage: t.common.errorGeneric,
+                      successMessage: t.common.deleted,
                     }),
-                  successMessage: t.common.deleted,
                 })
               }
             />

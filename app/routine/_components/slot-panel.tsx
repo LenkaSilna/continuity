@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
+import { withDelete } from "@/lib/with-delete";
 import { TrashIcon } from "@/app/_components/icons";
 import type {
   Habit,
@@ -239,12 +240,14 @@ export function SlotPanel({
                       confirmLabel: t.common.delete,
                       cancelLabel: t.common.cancel,
                       onConfirm: () =>
-                        start(async () => {
-                          await deleteRoutineItem(row.routineId);
-                          queryClient.invalidateQueries({ queryKey: ["routine-data"] });
-                          queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
+                        withDelete({
+                          action: () => deleteRoutineItem(row.routineId),
+                          start,
+                          queryClient,
+                          invalidateKeys: [["routine-data"], ["calendar-day"]],
+                          errorMessage: t.common.errorGeneric,
+                          successMessage: t.common.deleted,
                         }),
-                      successMessage: t.common.deleted,
                     })
                   }
                   className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-zinc-300 text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-900"

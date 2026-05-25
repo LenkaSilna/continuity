@@ -1,10 +1,7 @@
 import { supabase } from "@/lib/supabase/browser";
+import type { ActionState } from "@/lib/types";
 
-export type ActionState = {
-  errorCode?: "name_required" | "generic";
-  errorDetail?: string;
-  ok?: boolean;
-};
+export type { ActionState } from "@/lib/types";
 
 export async function addHabit(formData: FormData): Promise<ActionState> {
   const name = String(formData.get("name") ?? "").trim();
@@ -38,6 +35,8 @@ export async function updateHabit(
   return { ok: true };
 }
 
-export async function deleteHabit(id: string): Promise<void> {
-  await supabase.from("habits").delete().eq("id", id);
+export async function deleteHabit(id: string): Promise<ActionState> {
+  const { error } = await supabase.from("habits").delete().eq("id", id);
+  if (error) return { errorCode: "generic", errorDetail: error.message };
+  return { ok: true };
 }

@@ -28,6 +28,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const setLocale = (l: Locale) => {
     if (!(LOCALES as readonly string[]).includes(l)) return;
     localStorage.setItem(LOCALE_KEY, l);
+    document.documentElement.setAttribute("lang", l);
     setLocaleState(l);
   };
 

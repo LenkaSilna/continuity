@@ -72,8 +72,13 @@ export async function setMood(date: string, mood: number | null): Promise<{ erro
   }
 }
 
-export async function setNotes(date: string, notes: string): Promise<void> {
-  await supabase.from("daily_notes").upsert({ log_date: date, notes: notes.trim() || null });
+export async function setNotes(date: string, notes: string): Promise<{ error?: string }> {
+  try {
+    await supabase.from("daily_notes").upsert({ log_date: date, notes: notes.trim() || null });
+    return {};
+  } catch {
+    return { error: "generic" };
+  }
 }
 
 // ─── menstruation ────────────────────────────────────────────────

@@ -25,9 +25,10 @@ export function PeriodPicker({
   const serverRef = useRef(intensity);
 
   useEffect(() => {
+    if (isPending) return;
     serverRef.current = intensity;
     setLocalIntensity(intensity);
-  }, [intensity]);
+  }, [intensity, isPending]);
 
   const options: { value: CycleIntensity | null; label: string }[] = [
     { value: null, label: t.calendar.day.period.none },

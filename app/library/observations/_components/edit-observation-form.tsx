@@ -5,6 +5,7 @@ import { deleteObservation, updateObservation, type ActionState } from "../_acti
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
 import { showSuccess } from "@/lib/toast";
+import { withDelete } from "@/lib/with-delete";
 import { FormField, fieldInputCn } from "@/app/_components/form-field";
 import { EditFormActions } from "@/app/_components/edit-form-actions";
 import type { Tag } from "@/lib/types";
@@ -99,13 +100,15 @@ export function EditObservationForm({
             confirmLabel: t.common.delete,
             cancelLabel: t.common.cancel,
             onConfirm: () =>
-              startDelete(async () => {
-                await deleteObservation(tag.id);
-                queryClient.invalidateQueries({ queryKey: ["observations"] });
-        queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
-                navigate({ to: "/library/observations" });
+              withDelete({
+                action: () => deleteObservation(tag.id),
+                start: startDelete,
+                queryClient,
+                invalidateKeys: [["observations"], ["calendar-day"]],
+                navigate: () => navigate({ to: "/library/observations" }),
+                errorMessage: t.common.errorGeneric,
+                successMessage: t.common.deleted,
               }),
-            successMessage: t.common.deleted,
           })
         }
         saveLabel={t.common.save}

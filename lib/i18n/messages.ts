@@ -20,6 +20,7 @@ const cs = {
     deleted: "Smazáno ✓",
     loading: "Načítám…",
     requiredField: "*",
+    errorGeneric: "Načítání selhalo.",
   },
   login: {
     subtitle: "Přihlas se přes kód v emailu.",
@@ -542,6 +543,7 @@ const en: Messages = {
     deleted: "Deleted ✓",
     loading: "Loading…",
     requiredField: "*",
+    errorGeneric: "Failed to load.",
   },
   login: {
     subtitle: "Sign in with a code sent to your email.",

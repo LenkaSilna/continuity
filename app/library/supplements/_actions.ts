@@ -1,11 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/browser";
+import type { ActionState } from "@/lib/types";
 
-export type ActionState = {
-  errorCode?: "name_required" | "type_exists" | "brand_exists" | "generic";
-  errorDetail?: string;
-  ok?: boolean;
-};
+export type { ActionState } from "@/lib/types";
 
 // ─── supplement types ────────────────────────────────────────────
 
@@ -28,8 +25,10 @@ export async function addSupplementType(formData: FormData): Promise<ActionState
   return { ok: true };
 }
 
-export async function deleteSupplementType(id: string): Promise<void> {
-  await supabase.from("supplement_types").delete().eq("id", id);
+export async function deleteSupplementType(id: string): Promise<ActionState> {
+  const { error } = await supabase.from("supplement_types").delete().eq("id", id);
+  if (error) return { errorCode: "generic", errorDetail: error.message };
+  return { ok: true };
 }
 
 // ─── supplement brands ───────────────────────────────────────────
@@ -47,8 +46,10 @@ export async function addSupplementBrand(formData: FormData): Promise<ActionStat
   return { ok: true };
 }
 
-export async function deleteSupplementBrand(id: string): Promise<void> {
-  await supabase.from("supplement_brands").delete().eq("id", id);
+export async function deleteSupplementBrand(id: string): Promise<ActionState> {
+  const { error } = await supabase.from("supplement_brands").delete().eq("id", id);
+  if (error) return { errorCode: "generic", errorDetail: error.message };
+  return { ok: true };
 }
 
 async function resolveSupplementBrandId(
@@ -126,6 +127,8 @@ export async function updateSupplement(
   return { ok: true };
 }
 
-export async function deleteSupplement(id: string): Promise<void> {
-  await supabase.from("supplements").delete().eq("id", id);
+export async function deleteSupplement(id: string): Promise<ActionState> {
+  const { error } = await supabase.from("supplements").delete().eq("id", id);
+  if (error) return { errorCode: "generic", errorDetail: error.message };
+  return { ok: true };
 }

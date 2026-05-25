@@ -30,9 +30,10 @@ export function ObservationsPicker({
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (isPending) return;
     serverRef.current = assignedIds;
     setLocalAssigned(assignedIds);
-  }, [assignedIds]);
+  }, [assignedIds, isPending]);
 
   const handleDetach = async (tagId: string) => {
     if (isPending) return;

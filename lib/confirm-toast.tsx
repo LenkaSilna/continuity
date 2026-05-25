@@ -1,13 +1,11 @@
 import { toast } from "sonner";
-import { showSuccess } from "./toast";
 
 type ConfirmToastOptions = {
   message: string;
   detail?: string;
   confirmLabel: string;
   cancelLabel: string;
-  onConfirm: () => void;
-  successMessage?: string;
+  onConfirm: () => void | Promise<void>;
 };
 
 export function confirmToast({
@@ -16,7 +14,6 @@ export function confirmToast({
   confirmLabel,
   cancelLabel,
   onConfirm,
-  successMessage,
 }: ConfirmToastOptions): void {
   toast.custom(
     (id) => (
@@ -37,10 +34,13 @@ export function confirmToast({
           </button>
           <button
             type="button"
-            onClick={() => {
+            onClick={async () => {
               toast.dismiss(id);
-              onConfirm();
-              if (successMessage) showSuccess(successMessage);
+              try {
+                await onConfirm();
+              } catch (error) {
+                console.error("Confirm action failed:", error);
+              }
             }}
             className="h-8 rounded-md bg-zinc-900 px-3 text-xs font-medium text-zinc-50 hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
           >

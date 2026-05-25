@@ -3,6 +3,7 @@ import { useParams, Link } from "@tanstack/react-router";
 import { supabase } from "@/lib/supabase/browser";
 import { useI18n } from "@/lib/i18n/client";
 import { TopNav } from "@/app/_components/top-nav";
+import { ErrorState } from "@/app/_components/error-state";
 import { EditProductForm } from "@/app/library/products/_components/edit-product-form";
 import type { Product, ProductBrand, ProductType } from "@/lib/types";
 
@@ -10,39 +11,46 @@ export function ProductDetailPage() {
   const { id } = useParams({ from: "/_protected/library/products/$id" });
   const { t } = useI18n();
 
-  const { data: product, isLoading } = useQuery({
+  const { data: product, isLoading, isError } = useQuery({
     queryKey: ["product", id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("products")
         .select("*")
         .eq("id", id)
         .maybeSingle<Product>();
+      if (error) throw error;
       return data as Product | null;
     },
   });
 
-  const { data: types = [] } = useQuery({
+  const { data: types = [], isError: isTypesError } = useQuery({
     queryKey: ["product-types"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("product_types")
         .select("*")
         .order("position", { ascending: true });
+      if (error) throw error;
       return (data ?? []) as ProductType[];
     },
   });
 
-  const { data: brands = [] } = useQuery({
+  const { data: brands = [], isError: isBrandsError } = useQuery({
     queryKey: ["product-brands"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("product_brands")
         .select("*")
         .order("name", { ascending: true });
+      if (error) throw error;
       return (data ?? []) as ProductBrand[];
     },
   });
+
+  if (isError || isTypesError || isBrandsError) {
+    return <ErrorState message={t.common.errorGeneric} />;
+  }
 
   if (!isLoading && !product) {
     return (

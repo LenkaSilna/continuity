@@ -61,7 +61,10 @@ export async function updateCustomPrompt(
   return {};
 }
 
-export async function deleteCustomPrompt(id: string): Promise<{ error?: string }> {
+export async function deleteCustomPrompt(
+  id: string,
+): Promise<{ errorCode?: "generic"; errorDetail?: string; ok?: boolean }> {
   const { error } = await supabase.from("custom_prompts").delete().eq("id", id);
-  return error ? { error: error.message } : {};
+  if (error) return { errorCode: "generic", errorDetail: error.message };
+  return { ok: true };
 }

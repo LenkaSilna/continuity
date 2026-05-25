@@ -25,12 +25,16 @@ export function AuthCallback() {
         }
 
         // Seed appearance from profile so CSS vars match DB immediately
-        const { data: profile } = await supabase
-          .from("profile")
-          .select("theme, accent")
-          .maybeSingle<{ theme: ThemeMode; accent: Accent }>();
+        try {
+          const { data: profile } = await supabase
+            .from("profile")
+            .select("theme, accent")
+            .maybeSingle<{ theme: ThemeMode; accent: Accent }>();
 
-        if (profile) applyAppearance({ theme: profile.theme, accent: profile.accent });
+          if (profile) applyAppearance({ theme: profile.theme, accent: profile.accent });
+        } catch (err) {
+          console.warn("Failed to seed appearance:", err);
+        }
 
         navigate({ to: "/dashboard" });
       });

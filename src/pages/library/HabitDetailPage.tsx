@@ -3,6 +3,7 @@ import { useParams, Link } from "@tanstack/react-router";
 import { supabase } from "@/lib/supabase/browser";
 import { useI18n } from "@/lib/i18n/client";
 import { TopNav } from "@/app/_components/top-nav";
+import { ErrorState } from "@/app/_components/error-state";
 import { EditHabitForm } from "@/app/library/habits/_components/edit-habit-form";
 import type { Habit } from "@/lib/types";
 
@@ -10,17 +11,22 @@ export function HabitDetailPage() {
   const { id } = useParams({ from: "/_protected/library/habits/$id" });
   const { t } = useI18n();
 
-  const { data: habit, isLoading } = useQuery({
+  const { data: habit, isLoading, isError } = useQuery({
     queryKey: ["habit", id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("habits")
         .select("*")
         .eq("id", id)
         .maybeSingle<Habit>();
+      if (error) throw error;
       return data as Habit | null;
     },
   });
+
+  if (isError) {
+    return <ErrorState message={t.common.errorGeneric} />;
+  }
 
   if (!isLoading && !habit) {
     return (

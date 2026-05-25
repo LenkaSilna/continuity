@@ -2,7 +2,7 @@ import { useState, useTransition } from "react";
 import { DATA_BLOCKS, type DataBlock } from "@/lib/types";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
-import { showError } from "@/lib/toast";
+import { showError, showSuccess } from "@/lib/toast";
 import { ToggleChip } from "@/app/_components/toggle-chip";
 import type { CustomPromptActionState } from "../_actions";
 
@@ -12,7 +12,7 @@ type Props = {
   initialName?: string;
   initialQuestion?: string;
   initialBlocks?: DataBlock[];
-  onDelete?: () => Promise<void>;
+  onDelete?: () => Promise<{ errorCode?: string } | void>;
 };
 
 export function CustomPromptForm({
@@ -110,7 +110,7 @@ export function CustomPromptForm({
         />
       </div>
 
-      <div className="safe-bottom sticky bottom-0 -mx-4 flex items-center gap-2 border-t border-zinc-200 bg-[var(--background)]/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 dark:border-zinc-800 ">
+      <div className="safe-bottom sticky bottom-0 -mx-4 flex items-center gap-2 border-t border-zinc-200 bg-(--background)/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 dark:border-zinc-800 ">
         <button
           type="submit"
           disabled={isPending}
@@ -128,8 +128,12 @@ export function CustomPromptForm({
                 detail: name,
                 confirmLabel: t.common.delete,
                 cancelLabel: t.common.cancel,
-                onConfirm: () => startDelete(() => onDelete()),
-                successMessage: t.common.deleted,
+                onConfirm: () =>
+                  startDelete(async () => {
+                    const result = await onDelete();
+                    if (result?.errorCode) { showError(t.ai.custom.errors.generic); return; }
+                    showSuccess(t.common.deleted);
+                  }),
               })
             }
             className="inline-flex h-11 items-center justify-center rounded-md border border-red-200 px-4 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950"

@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { deleteSupplement } from "../_actions";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
+import { withDelete } from "@/lib/with-delete";
 import { EmptyState } from "@/app/_components/empty-state";
 import { ListItemActions } from "@/app/_components/list-item-actions";
 import type { Supplement, SupplementBrand, SupplementType } from "@/lib/types";
@@ -90,13 +91,14 @@ export function SupplementsList({
                   confirmLabel: t.common.delete,
                   cancelLabel: t.common.cancel,
                   onConfirm: () =>
-                    start(async () => {
-                      await deleteSupplement(s.id);
-                      queryClient.invalidateQueries({ queryKey: ["supplements"] });
-                      queryClient.invalidateQueries({ queryKey: ["routine-data"] });
-                      queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
+                    withDelete({
+                      action: () => deleteSupplement(s.id),
+                      start,
+                      queryClient,
+                      invalidateKeys: [["supplements"], ["routine-data"], ["calendar-day"]],
+                      errorMessage: t.common.errorGeneric,
+                      successMessage: t.common.deleted,
                     }),
-                  successMessage: t.common.deleted,
                 })
               }
             />

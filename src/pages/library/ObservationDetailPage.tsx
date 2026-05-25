@@ -3,6 +3,7 @@ import { useParams, Link } from "@tanstack/react-router";
 import { supabase } from "@/lib/supabase/browser";
 import { useI18n } from "@/lib/i18n/client";
 import { TopNav } from "@/app/_components/top-nav";
+import { ErrorState } from "@/app/_components/error-state";
 import { EditObservationForm } from "@/app/library/observations/_components/edit-observation-form";
 import type { Tag } from "@/lib/types";
 
@@ -10,29 +11,35 @@ export function ObservationDetailPage() {
   const { id } = useParams({ from: "/_protected/library/observations/$id" });
   const { t } = useI18n();
 
-  const { data: tag, isLoading } = useQuery({
+  const { data: tag, isLoading, isError } = useQuery({
     queryKey: ["observation", id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("tags")
         .select("*")
         .eq("id", id)
         .maybeSingle<Tag>();
+      if (error) throw error;
       return data as Tag | null;
     },
   });
 
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], isError: isCategoriesError } = useQuery({
     queryKey: ["observation-categories"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("tags")
         .select("category")
         .not("category", "is", null)
         .order("category", { ascending: true });
+      if (error) throw error;
       return [...new Set((data ?? []).map((row) => row.category as string))];
     },
   });
+
+  if (isError || isCategoriesError) {
+    return <ErrorState message={t.common.errorGeneric} />;
+  }
 
   if (!isLoading && !tag) {
     return (

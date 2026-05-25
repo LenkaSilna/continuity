@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/i18n/client";
 import { updateCustomPrompt, deleteCustomPrompt } from "@/app/ai/custom/_actions";
 import { CustomPromptForm } from "@/app/ai/custom/_components/custom-prompt-form";
 import { TopNav } from "@/app/_components/top-nav";
+import { ErrorState } from "@/app/_components/error-state";
 import type { CustomPrompt } from "@/lib/types";
 
 export function AiCustomEditPage() {
@@ -13,17 +14,22 @@ export function AiCustomEditPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["custom-prompt", id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("custom_prompts")
         .select("*")
         .eq("id", id)
         .maybeSingle<CustomPrompt>();
+      if (error) throw error;
       return data as CustomPrompt | null;
     },
   });
+
+  if (isError) {
+    return <ErrorState message={t.common.errorGeneric} />;
+  }
 
   if (!isLoading && !data) {
     return (
@@ -68,9 +74,13 @@ export function AiCustomEditPage() {
             initialQuestion={data.question ?? ""}
             initialBlocks={data.data_blocks}
             onDelete={async () => {
-              await deleteCustomPrompt(id);
+              const result = await deleteCustomPrompt(id);
+              if (result.errorCode) {
+                return result;
+              }
               queryClient.invalidateQueries({ queryKey: ["custom-prompts"] });
               navigate({ to: "/ai" });
+              return result;
             }}
           />
         )}

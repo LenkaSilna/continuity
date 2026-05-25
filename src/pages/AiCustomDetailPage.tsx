@@ -6,7 +6,9 @@ import { useI18n } from "@/lib/i18n/client";
 import { buildCustomPrompt } from "@/lib/ai-prompts";
 import { deleteCustomPrompt } from "@/app/ai/custom/_actions";
 import { confirmToast } from "@/lib/confirm-toast";
+import { withDelete } from "@/lib/with-delete";
 import { TopNav } from "@/app/_components/top-nav";
+import { ErrorState } from "@/app/_components/error-state";
 import { PromptEditor } from "@/app/ai/_components/prompt-editor";
 import { PencilIcon, TrashIcon } from "@/app/_components/icons";
 import type { CustomPrompt } from "@/lib/types";
@@ -18,19 +20,24 @@ export function AiCustomDetailPage() {
   const queryClient = useQueryClient();
   const [isDeleting, startDelete] = useTransition();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["custom-prompt", id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("custom_prompts")
         .select("*")
         .eq("id", id)
         .maybeSingle<CustomPrompt>();
+      if (error) throw error;
       if (!data) return null;
       const text = await buildCustomPrompt(supabase, data, locale);
       return { prompt: data, text };
     },
   });
+
+  if (isError) {
+    return <ErrorState message={t.common.errorGeneric} />;
+  }
 
   if (!isLoading && !data) {
     return (
@@ -63,12 +70,15 @@ export function AiCustomDetailPage() {
                     confirmLabel: t.common.delete,
                     cancelLabel: t.common.cancel,
                     onConfirm: () =>
-                      startDelete(async () => {
-                        await deleteCustomPrompt(id);
-                        queryClient.invalidateQueries({ queryKey: ["custom-prompts"] });
-                        navigate({ to: "/ai" });
+                      withDelete({
+                        action: () => deleteCustomPrompt(id),
+                        start: startDelete,
+                        queryClient,
+                        invalidateKeys: [["custom-prompts"]],
+                        navigate: () => navigate({ to: "/ai" }),
+                        errorMessage: t.common.errorGeneric,
+                        successMessage: t.common.deleted,
                       }),
-                    successMessage: t.common.deleted,
                   })
                 }
                 className="inline-flex h-10 min-w-[44px] items-center gap-1.5 rounded-md border border-red-200 px-3 text-sm text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950"

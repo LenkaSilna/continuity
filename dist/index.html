@@ -16,6 +16,8 @@
     <!-- Apply theme + accent from localStorage before React mounts to prevent FOUC -->
     <script>
       (function () {
+        var locale = localStorage.getItem("locale") || "cs";
+        document.documentElement.setAttribute("lang", locale);
         var t = localStorage.getItem("app_theme") || "light";
         var a = localStorage.getItem("app_accent") || "lavender";
         var accents = {
@@ -32,8 +34,8 @@
         el.style.setProperty("--accent-soft", dark ? p.softDark : p.soft);
       })();
     </script>
-    <script type="module" crossorigin src="/assets/index-BxXIkeKk.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-p0MBzhCT.css">
+    <script type="module" crossorigin src="/assets/index-DqXee4Im.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BayYDAAu.css">
   </head>
   <body>
     <div id="root"></div>

@@ -5,6 +5,7 @@ import { deleteSupplement, updateSupplement, type ActionState } from "../_action
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
 import { showSuccess } from "@/lib/toast";
+import { withDelete } from "@/lib/with-delete";
 import { FormField, fieldInputCn } from "@/app/_components/form-field";
 import { EditFormActions } from "@/app/_components/edit-form-actions";
 import type { Supplement, SupplementBrand, SupplementType } from "@/lib/types";
@@ -143,14 +144,15 @@ export function EditSupplementForm({
             confirmLabel: t.common.delete,
             cancelLabel: t.common.cancel,
             onConfirm: () =>
-              startDelete(async () => {
-                await deleteSupplement(supplement.id);
-                queryClient.invalidateQueries({ queryKey: ["supplements"] });
-        queryClient.invalidateQueries({ queryKey: ["routine-data"] });
-        queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
-                navigate({ to: "/library/supplements" });
+              withDelete({
+                action: () => deleteSupplement(supplement.id),
+                start: startDelete,
+                queryClient,
+                invalidateKeys: [["supplements"], ["routine-data"], ["calendar-day"]],
+                navigate: () => navigate({ to: "/library/supplements" }),
+                errorMessage: t.common.errorGeneric,
+                successMessage: t.common.deleted,
               }),
-            successMessage: t.common.deleted,
           })
         }
         saveLabel={t.common.save}
