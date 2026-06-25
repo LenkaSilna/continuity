@@ -194,16 +194,16 @@ tap targets for native feel.
 
 ## Supabase keep-alive (free tier)
 
-Free-tier Supabase projects pause after 7 days of inactivity. A GitHub Actions workflow pings the REST API every 4 days to prevent this.
+Free-tier Supabase projects pause after 7 days of inactivity. A GitHub Actions workflow pings the REST API daily to prevent this. The ping uses the **service role key** — the anon key may return empty results due to RLS without executing a real DB query, which Supabase might not count as activity.
 
 **Setup** (one-time, in GitHub → repo → Settings → Secrets and variables → Actions):
 
 | Secret | Value |
 | --- | --- |
 | `SUPABASE_URL` | Supabase Dashboard → Settings → API → Project URL |
-| `SUPABASE_ANON_KEY` | Supabase Dashboard → Settings → API → `anon` `public` key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Settings → API → `service_role` (secret) key |
 
-The workflow (`.github/workflows/supabase-keepalive.yml`) runs on a schedule and can also be triggered manually via **Actions → Supabase keep-alive → Run workflow**.
+The workflow (`.github/workflows/supabase-keepalive.yml`) runs daily at 08:00 UTC and can also be triggered manually via **Actions → Supabase keep-alive → Run workflow**.
 
 ## Deploy to Netlify
 
