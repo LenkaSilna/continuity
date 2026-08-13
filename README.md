@@ -194,7 +194,9 @@ tap targets for native feel.
 
 ## Supabase keep-alive (free tier)
 
-Free-tier Supabase projects pause after 7 days of inactivity. A GitHub Actions workflow pings the REST API daily to prevent this. The ping uses the **service role key** — the anon key may return empty results due to RLS without executing a real DB query, which Supabase might not count as activity.
+Free-tier Supabase projects pause after 7 days of inactivity. A GitHub Actions workflow writes a row to `keepalive_log` every 5 days to prevent this — an INSERT via the **service role key** is unambiguous DB activity, unlike a SELECT which might return empty (due to RLS) without Supabase counting it. The 5-day cadence leaves margin so one failed run doesn't tip the project into pausing; once paused, the ping itself starts failing (no self-healing), so check **Actions** occasionally for failed runs.
+
+`keepalive_log` is created by `supabase/migrations/0002_keepalive_log.sql` — RLS is enabled with no policies, so only the service role can read/write it.
 
 **Setup** (one-time, in GitHub → repo → Settings → Secrets and variables → Actions):
 
@@ -203,7 +205,7 @@ Free-tier Supabase projects pause after 7 days of inactivity. A GitHub Actions w
 | `SUPABASE_URL` | Supabase Dashboard → Settings → API → Project URL |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Settings → API → `service_role` (secret) key |
 
-The workflow (`.github/workflows/supabase-keepalive.yml`) runs daily at 08:00 UTC and can also be triggered manually via **Actions → Supabase keep-alive → Run workflow**.
+The workflow (`.github/workflows/supabase-keepalive.yml`) runs every 5 days at 08:00 UTC and can also be triggered manually via **Actions → Supabase keep-alive → Run workflow**.
 
 ## Deploy to Netlify
 

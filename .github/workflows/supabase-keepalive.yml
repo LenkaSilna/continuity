@@ -1,38 +1,50 @@
-# Keeps the Supabase free-tier project alive by pinging it daily.
+# Keeps the Supabase free-tier project alive by writing a row every 5 days.
 #
-# Supabase pauses projects after 7 days of inactivity. A daily ping via the
-# service role key ensures a real DB query executes and resets the timer.
-# The anon key is intentionally NOT used — it may return empty results due to
-# RLS without touching the database, which Supabase might not count as activity.
+# Supabase pauses projects after 7 days of inactivity. An INSERT via the
+# service role key is unambiguous "activity" that resets the timer — unlike a
+# SELECT, which the anon key might return empty (due to RLS) without actually
+# touching the database, and which Supabase may not count.
+#
+# The 5-day cadence (not 7) leaves margin: if one scheduled run fails (GitHub
+# Actions outage, rotated secret, etc.) there's still time for the next
+# attempt before the project actually pauses. Once a project is paused, any
+# REST call — including this ping — starts failing, so there's no self-healing
+# once that line is crossed; margin is the only real defense.
 #
 # Required GitHub secrets:
 #   SUPABASE_URL              — e.g. https://xxxxxxxxxxxx.supabase.co
 #   SUPABASE_SERVICE_ROLE_KEY — Project Settings → API → service_role (secret)
+#
+# Requires the keepalive_log table (supabase/migrations/0002_keepalive_log.sql).
 
 name: Supabase keep-alive
 
 on:
   schedule:
-    # Every 4 days at 08:00 UTC (Supabase pauses after 7 days of inactivity)
-    - cron: '0 8 */4 * *'
+    # Every 5 days at 08:00 UTC (Supabase pauses after 7 days of inactivity)
+    - cron: '0 8 */5 * *'
   workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase
+      - name: Write keep-alive row
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST \
             -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/profile?limit=1")
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d '{}' \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/keepalive_log")
 
           echo "Status: $STATUS"
 
-          if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 500 ]; then
-            echo "Ping failed — project may be paused or misconfigured."
+          if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 300 ]; then
+            echo "Write failed — project may be paused or misconfigured."
             exit 1
           fi
 
-          echo "Project is alive."
+          echo "Keep-alive row written."
