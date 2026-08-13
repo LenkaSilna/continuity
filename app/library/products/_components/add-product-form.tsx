@@ -35,7 +35,7 @@ export function AddProductForm({
       queryClient.invalidateQueries({ queryKey: ["routine-data"] });
       queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
     }
-  }, [state.ok]);
+  }, [state.ok, queryClient, t.common.saved]);
 
   const errorMessage = (() => {
     if (state.errorCode === "name_required") return t.library.products.errors.nameRequired;

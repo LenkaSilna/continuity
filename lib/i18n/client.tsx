@@ -7,7 +7,7 @@ import {
 } from "react";
 import { DEFAULT_LOCALE, LOCALES, messages, type Locale, type Messages } from "./messages";
 
-export const LOCALE_KEY = "locale";
+const LOCALE_KEY = "locale";
 
 function readLocaleFromStorage(): Locale {
   const v = localStorage.getItem(LOCALE_KEY);
@@ -41,6 +41,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- Context + Provider + hook colocated by design
 export function useI18n(): Ctx {
   const ctx = useContext(I18nContext);
   if (!ctx) throw new Error("useI18n must be used within I18nProvider");

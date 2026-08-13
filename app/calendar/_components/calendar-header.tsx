@@ -4,7 +4,6 @@ import { setCalendarView } from "../_actions";
 
 export function CalendarHeader({
   view,
-  date,
   title,
   prevHref,
   nextHref,
@@ -15,7 +14,6 @@ export function CalendarHeader({
   onViewChange,
 }: {
   view: CalendarView;
-  date: string;
   title: string;
   prevHref: string;
   nextHref: string;
@@ -67,7 +65,7 @@ export function CalendarHeader({
                 key={v}
                 type="button"
                 onClick={() => {
-                  setCalendarView(v, date);
+                  setCalendarView(v);
                   onViewChange(v);
                 }}
                 className={[

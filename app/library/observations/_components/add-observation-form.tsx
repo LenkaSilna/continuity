@@ -27,7 +27,7 @@ export function AddObservationForm({ categories }: { categories: string[] }) {
       queryClient.invalidateQueries({ queryKey: ["observations"] });
       queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
     }
-  }, [state]);
+  }, [state, queryClient, t.common.saved]);
 
   const errorMessage = (() => {
     if (state.errorCode === "name_required") return t.library.observations.errors.nameRequired;

@@ -22,7 +22,7 @@ export function SupplementTypesSection({ types }: { types: SupplementType[] }) {
 
   useEffect(() => {
     if (state.ok) queryClient.invalidateQueries({ queryKey: ["supplement-types"] });
-  }, [state.ok]);
+  }, [state.ok, queryClient]);
 
   const errorMessage = (() => {
     if (state.errorCode === "name_required") return t.library.supplements.errors.nameRequired;

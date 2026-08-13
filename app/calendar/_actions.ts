@@ -3,10 +3,7 @@ import type { CalendarView, CycleIntensity, ItemKind, TimeOfDay } from "@/lib/ty
 
 // ─── view persistence ────────────────────────────────────────────
 
-export async function setCalendarView(
-  view: CalendarView,
-  date: string,
-): Promise<void> {
+export async function setCalendarView(view: CalendarView): Promise<void> {
   if (view !== "month" && view !== "week" && view !== "day") return;
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;

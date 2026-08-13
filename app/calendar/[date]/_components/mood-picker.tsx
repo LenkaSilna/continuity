@@ -16,12 +16,17 @@ export function MoodPicker({
   const queryClient = useQueryClient();
   const [localMood, setLocalMood] = useState(mood);
   const [isPending, setIsPending] = useState(false);
+  const [syncedMood, setSyncedMood] = useState(mood);
   const serverRef = useRef(mood);
 
   useEffect(() => {
     serverRef.current = mood;
-    setLocalMood(mood);
   }, [mood]);
+
+  if (mood !== syncedMood) {
+    setSyncedMood(mood);
+    setLocalMood(mood);
+  }
 
   const levels = [1, 2, 3, 4, 5] as const;
   const labels = t.calendar.day.mood.levels;

@@ -22,7 +22,7 @@ export function ProductBrandsSection({ brands }: { brands: ProductBrand[] }) {
 
   useEffect(() => {
     if (state.ok) queryClient.invalidateQueries({ queryKey: ["product-brands"] });
-  }, [state.ok]);
+  }, [state.ok, queryClient]);
 
   const errorMessage = (() => {
     if (state.errorCode === "name_required") return t.library.products.errors.nameRequired;

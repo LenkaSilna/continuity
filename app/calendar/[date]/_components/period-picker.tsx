@@ -22,13 +22,18 @@ export function PeriodPicker({
   const queryClient = useQueryClient();
   const [localIntensity, setLocalIntensity] = useState(intensity);
   const [isPending, setIsPending] = useState(false);
+  const [syncedIntensity, setSyncedIntensity] = useState(intensity);
   const serverRef = useRef(intensity);
 
   useEffect(() => {
     if (isPending) return;
     serverRef.current = intensity;
-    setLocalIntensity(intensity);
   }, [intensity, isPending]);
+
+  if (!isPending && intensity !== syncedIntensity) {
+    setSyncedIntensity(intensity);
+    setLocalIntensity(intensity);
+  }
 
   const options: { value: CycleIntensity | null; label: string }[] = [
     { value: null, label: t.calendar.day.period.none },

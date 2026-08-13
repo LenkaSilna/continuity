@@ -33,7 +33,7 @@ export function NotesEditor({
       });
     }, 800);
     return () => clearTimeout(handle);
-  }, [value, date]);
+  }, [value, date, queryClient, t.calendar.errors.generic]);
 
   return (
     <section className="space-y-2 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">

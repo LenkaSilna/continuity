@@ -26,14 +26,19 @@ export function ObservationsPicker({
   const [isPending, setIsPending] = useState(false);
   const [query, setQuery] = useState("");
   const [localAssigned, setLocalAssigned] = useState(assignedIds);
+  const [syncedAssigned, setSyncedAssigned] = useState(assignedIds);
   const serverRef = useRef(assignedIds);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isPending) return;
     serverRef.current = assignedIds;
-    setLocalAssigned(assignedIds);
   }, [assignedIds, isPending]);
+
+  if (!isPending && assignedIds !== syncedAssigned) {
+    setSyncedAssigned(assignedIds);
+    setLocalAssigned(assignedIds);
+  }
 
   const handleDetach = async (tagId: string) => {
     if (isPending) return;

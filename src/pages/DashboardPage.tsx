@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import type { PostgrestError } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/browser";
 import { useI18n } from "@/lib/i18n/client";
 import { PROMPT_TYPES } from "@/lib/ai-prompts";
@@ -35,28 +36,18 @@ export function DashboardPage() {
     },
   });
 
-  const { data: profile, error: profileError } = useQuery({
+  const { data: profile, error: profileError } = useQuery<Profile | null, PostgrestError>({
     queryKey: ["profile"],
     queryFn: async () => {
       const { data, error } = await supabase.from("profile").select("*").maybeSingle<Profile>();
       if (error) throw error;
-      return data as Profile | null;
+      return data;
     },
   });
 
-  // Redirect to /profile if no profile yet
-  if (profile === null && !profileError) {
-    navigate({ to: "/profile" });
-    return (
-      <main className="flex min-h-screen items-center justify-center">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100" />
-      </main>
-    );
-  }
-
   const p = profile;
   const tableMissing =
-    (profileError as any)?.code === "PGRST205" || (profileError as any)?.code === "42P01";
+    profileError?.code === "PGRST205" || profileError?.code === "42P01";
 
   const kindEnabled: Record<ItemKind, boolean> = p
     ? { product: p.module_products, supplement: p.module_supplements, habit: p.module_habits }
@@ -97,6 +88,16 @@ export function DashboardPage() {
     },
   });
 
+  // Redirect to /profile if no profile yet
+  if (profile === null && !profileError) {
+    navigate({ to: "/profile" });
+    return (
+      <main className="flex min-h-screen items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100" />
+      </main>
+    );
+  }
+
   const todayTitle =
     p &&
     new Intl.DateTimeFormat(locale, {
@@ -134,7 +135,7 @@ export function DashboardPage() {
           </section>
         ) : profileError ? (
           <section className="rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-900 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
-            {t.dbError.generic} {(profileError as any)?.message}
+            {t.dbError.generic} {profileError?.message}
           </section>
         ) : p ? (
           <>

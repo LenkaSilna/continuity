@@ -2,11 +2,9 @@ type ToggleChipProps = {
   label: string;
   active: boolean;
   onClick: () => void;
-  name?: string;
-  value?: string;
 };
 
-export function ToggleChip({ label, active, onClick, name, value }: ToggleChipProps) {
+export function ToggleChip({ label, active, onClick }: ToggleChipProps) {
   return (
     <button
       type="button"

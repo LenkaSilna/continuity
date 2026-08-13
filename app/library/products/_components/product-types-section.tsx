@@ -22,7 +22,7 @@ export function ProductTypesSection({ types }: { types: ProductType[] }) {
 
   useEffect(() => {
     if (state.ok) queryClient.invalidateQueries({ queryKey: ["product-types"] });
-  }, [state.ok]);
+  }, [state.ok, queryClient]);
 
   const errorMessage = (() => {
     if (state.errorCode === "name_required") return t.library.products.errors.nameRequired;

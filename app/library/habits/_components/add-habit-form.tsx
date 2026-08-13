@@ -27,7 +27,7 @@ export function AddHabitForm() {
       queryClient.invalidateQueries({ queryKey: ["routine-data"] });
       queryClient.invalidateQueries({ queryKey: ["calendar-day"] });
     }
-  }, [state]);
+  }, [state, queryClient, t.common.saved]);
 
   const errorMessage = (() => {
     if (state.errorCode === "name_required") return t.library.habits.errors.nameRequired;

@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams, Link, useNavigate } from "@tanstack/react-router";
+import { useParams, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/lib/supabase/browser";
 import { useI18n } from "@/lib/i18n/client";
 import { getModuleFlags } from "@/lib/modules";
@@ -163,7 +163,6 @@ export function CalendarDayPage() {
           <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
           <CalendarHeader
             view="day"
-            date={date}
             title=""
             prevHref={`/calendar/${prevISO}`}
             nextHref={`/calendar/${nextISO}`}

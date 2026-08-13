@@ -26,13 +26,18 @@ export function RoutineChecklist({
   const queryClient = useQueryClient();
   const [localLogged, setLocalLogged] = useState(logged);
   const [pendingKeys, setPendingKeys] = useState(new Set<string>());
+  const [syncedLogged, setSyncedLogged] = useState(logged);
   const serverRef = useRef(logged);
 
   useEffect(() => {
     if (pendingKeys.size > 0) return;
     serverRef.current = logged;
-    setLocalLogged(logged);
   }, [logged, pendingKeys]);
+
+  if (pendingKeys.size === 0 && logged !== syncedLogged) {
+    setSyncedLogged(logged);
+    setLocalLogged(logged);
+  }
 
   const order: TimeOfDay[] = ["morning", "afternoon", "evening"];
   const slotLabels = t.routine.slots;

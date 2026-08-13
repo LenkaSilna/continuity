@@ -54,11 +54,6 @@ export function CalendarPage() {
     ? viewParam
     : (profileData?.calendar_view ?? "month");
 
-  if (view === "day") {
-    navigate({ to: "/calendar/$date", params: { date: focusISO } });
-    return null;
-  }
-
   const range =
     view === "month"
       ? (() => {
@@ -75,7 +70,7 @@ export function CalendarPage() {
 
   const { data: calData } = useQuery({
     queryKey: ["calendar-data", view, focusISO],
-    enabled: !!flags,
+    enabled: !!flags && view !== "day",
     queryFn: async () => {
       const [logsRes, notesRes, cyclesRes] = await Promise.all([
         flags!.module_routine
@@ -105,6 +100,11 @@ export function CalendarPage() {
       return { hasLogByDate, moodByDate, intensityByDate };
     },
   });
+
+  if (view === "day") {
+    navigate({ to: "/calendar/$date", params: { date: focusISO } });
+    return null;
+  }
 
   const title =
     view === "month"
@@ -147,7 +147,6 @@ export function CalendarPage() {
 
         <CalendarHeader
           view={view}
-          date={focusISO}
           title={title}
           prevHref={hrefFor(prevISO)}
           nextHref={hrefFor(nextISO)}
