@@ -39,7 +39,7 @@ export function RoutineTabs({
       <div
         role="tablist"
         aria-label={t.routine.title}
-        className="flex gap-1 rounded-lg border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-800 dark:bg-zinc-900"
+        className="flex gap-1 rounded-(--cui-radius-full) bg-(--surface-3) p-1"
       >
         {SLOTS.map((slot) => {
           const isActive = slot === active;
@@ -50,10 +50,10 @@ export function RoutineTabs({
               role="tab"
               aria-selected={isActive}
               onClick={() => setActive(slot)}
-              className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition ${
+              className={`flex-1 rounded-(--cui-radius-full) px-3 py-2 text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-950 dark:text-zinc-100"
-                  : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                  ? "bg-(--surface) text-(--text) shadow-(--cui-shadow-sm)"
+                  : "text-(--text-muted) hover:text-(--text)"
               }`}
             >
               {t.routine.slots[slot]}

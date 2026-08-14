@@ -27,6 +27,18 @@ export function isPromptType(v: string): v is PromptType {
   return (PROMPT_TYPES as readonly string[]).includes(v);
 }
 
+export const PERIOD_PRESETS = [7, 14, 30, 60, 90] as const;
+export type PeriodDays = (typeof PERIOD_PRESETS)[number];
+
+export const DEFAULT_PERIOD_DAYS: Record<PromptType, PeriodDays> = {
+  skincare: 30,
+  supplements: 30,
+  correlation: 60,
+  weekly: 7,
+};
+
+export const CUSTOM_PROMPT_DEFAULT_PERIOD_DAYS: PeriodDays = 30;
+
 // ─── helpers ────────────────────────────────────────────────────
 
 function toISO(d: Date): string {
@@ -128,12 +140,12 @@ type PromptStrings = {
   skincareRoutineSection: string;
   skincareRoutineNote: string;
   skincareRoutineEmpty: string;
-  skincareLast30Section: string;
+  skincareLast30Section: (days: number) => string;
   skincareMoodAvg: (val: string) => string;
   skincarePeriodRecords: (n: number) => string;
-  skincareObsSection: string;
+  skincareObsSection: (days: number) => string;
   skincareObsEmpty: string;
-  skincareObsCount: (n: number) => string;
+  skincareObsCount: (n: number, days: number) => string;
   skincareQuestion: string;
   // supplements
   supplementsTitle: string;
@@ -142,14 +154,14 @@ type PromptStrings = {
   supplementsRoutineSection: string;
   supplementsRoutineNote: string;
   supplementsRoutineEmpty: string;
-  supplementsUsageSection: string;
-  supplementsUsageCount: (n: number) => string;
+  supplementsUsageSection: (days: number) => string;
+  supplementsUsageCount: (n: number, days: number) => string;
   supplementsQuestion: string;
   // correlation
   correlationTitle: string;
   correlationLibrarySkinSection: string;
   correlationLibrarySupplementSection: string;
-  correlationDataSection: string;
+  correlationDataSection: (days: number) => string;
   correlationDataEmpty: string;
   correlationLibraryNone: string;
   correlationPeriodLabel: string;
@@ -157,12 +169,12 @@ type PromptStrings = {
   correlationUsedLabel: string;
   correlationQuestion: string;
   // weekly
-  weeklyTitle: string;
+  weeklyTitle: (days: number) => string;
   weeklyRoutineSection: (n: number) => string;
   weeklyRoutineNote: string;
   weeklyRoutineEmpty: string;
   weeklyDaysSection: string;
-  weeklyDaysEmpty: string;
+  weeklyDaysEmpty: (days: number) => string;
   weeklyDoneLabel: string;
   weeklyPeriodLabel: string;
   weeklyTagsLabel: string;
@@ -184,12 +196,12 @@ type PromptStrings = {
   customHabitsRoutineNote: string;
   customHabitsLibraryEmpty: string;
   customHabitsRoutineEmpty: string;
-  customObsSection: string;
+  customObsSection: (days: number) => string;
   customObsEmpty: string;
-  customObsCount: (n: number) => string;
-  customMoodSection: string;
+  customObsCount: (n: number, days: number) => string;
+  customMoodSection: (days: number) => string;
   customMoodNoteLabel: string;
-  customCycleSection: string;
+  customCycleSection: (days: number) => string;
   customNoQuestion: string;
 };
 
@@ -228,13 +240,13 @@ const STRINGS: Record<Locale, PromptStrings> = {
     skincareRoutineNote:
       "Produkty jsou v denních slotech vědomě. Nenavrhuj změny načasování, pokud o to nejsem požádána — výjimkou jsou bezpečnostní kontraindikace nebo zásadní chyby (např. retinol + AHA ráno).",
     skincareRoutineEmpty: "- (zatím žádné produkty v rutině)",
-    skincareLast30Section: "## Posledních 30 dní",
+    skincareLast30Section: (days) => `## Posledních ${days} dní`,
     skincareMoodAvg: (val) =>
       `- průměrná nálada (1=nejlepší, 5=nejhorší): ${val}`,
     skincarePeriodRecords: (n) => `- záznamů menstruace: ${n}`,
-    skincareObsSection: "## Pozorování pleti za 30 dní",
+    skincareObsSection: (days) => `## Pozorování pleti za ${days} dní`,
     skincareObsEmpty: "- (žádné relevantní tagy)",
-    skincareObsCount: (n) => `(${n}× za 30 dní)`,
+    skincareObsCount: (n, days) => `(${n}× za ${days} dní)`,
     skincareQuestion:
       "Co bys mi doporučil/a změnit, přidat nebo vynechat v rutině? Co by mohlo vysvětlit poslední pozorování pleti?",
     supplementsTitle: "# Žádost o radu se suplementací",
@@ -244,14 +256,15 @@ const STRINGS: Record<Locale, PromptStrings> = {
     supplementsRoutineNote:
       "Doplňky jsou v denních slotech vědomě — vím, kdy mám co brát. Nenavrhuj změny načasování, pokud o to nejsem požádána — výjimkou jsou bezpečnostní kontraindikace nebo zásadní chyby (např. látky, které se vzájemně blokují v absorpci).",
     supplementsRoutineEmpty: "- (zatím žádné doplňky v rutině)",
-    supplementsUsageSection: "## Skutečné užívání za 30 dní",
-    supplementsUsageCount: (n) => `${n}× za 30 dní`,
+    supplementsUsageSection: (days) => `## Skutečné užívání za ${days} dní`,
+    supplementsUsageCount: (n, days) => `${n}× za ${days} dní`,
     supplementsQuestion:
       "Mám smysluplné dávkování? Kombinují se látky dobře dohromady a s jídlem? Něco chybí, něco je zbytečné? Vidíš ve skutečném užívání vzor nepravidelnosti? Na časování změny nenavrhu, pokud nejde o kontraindikaci nebo zásadní chybu.",
     correlationTitle: "# Žádost o nalezení vzorů (korelace)",
     correlationLibrarySkinSection: "## Knihovna — kosmetika",
     correlationLibrarySupplementSection: "## Knihovna — doplňky",
-    correlationDataSection: "## Data za 60 dní (1=nejlepší nálada, 5=nejhorší)",
+    correlationDataSection: (days) =>
+      `## Data za ${days} dní (1=nejlepší nálada, 5=nejhorší)`,
     correlationDataEmpty: "- (žádná data)",
     correlationLibraryNone: "- (žádná)",
     correlationPeriodLabel: "perioda",
@@ -259,13 +272,13 @@ const STRINGS: Record<Locale, PromptStrings> = {
     correlationUsedLabel: "použito",
     correlationQuestion:
       "Najdi prosím vzory: které dny mám horší náladu, jestli to koreluje s cyklem, použitím konkrétních produktů (viz složení v knihovně), doplňků, návyků nebo pozorováními. Vidíš opakující se kombinace, které stojí za pozornost?",
-    weeklyTitle: "# Týdenní reflexe (7 dní)",
+    weeklyTitle: (days) => `# Reflexe za posledních ${days} dní`,
     weeklyRoutineSection: (n) => `## Záměrná rutina (${n} položek)`,
     weeklyRoutineNote:
       "Položky jsou v denních slotech vědomě. Nenavrhuj změny načasování, pokud o to nejsem požádána — výjimkou jsou bezpečnostní kontraindikace nebo zásadní chyby.",
     weeklyRoutineEmpty: "- (žádná)",
     weeklyDaysSection: "## Skutečné dny",
-    weeklyDaysEmpty: "- (žádná data za 7 dní)",
+    weeklyDaysEmpty: (days) => `- (žádná data za ${days} dní)`,
     weeklyDoneLabel: "splněno",
     weeklyPeriodLabel: "perioda",
     weeklyTagsLabel: "tagy",
@@ -290,13 +303,13 @@ const STRINGS: Record<Locale, PromptStrings> = {
       "Návyky jsou v denních slotech vědomě. Nenavrhuj změny načasování bez dotazu.",
     customHabitsLibraryEmpty: "- (žádné návyky)",
     customHabitsRoutineEmpty: "- (žádné návyky v rutině)",
-    customObsSection: "## Pozorování / tagy (posledních 30 dní)",
+    customObsSection: (days) => `## Pozorování / tagy (posledních ${days} dní)`,
     customObsEmpty: "- (žádné záznamy)",
-    customObsCount: (n) => `(${n}× za 30 dní)`,
-    customMoodSection:
-      "## Nálada a zápisky (posledních 30 dní, 1=nejlepší, 5=nejhorší)",
+    customObsCount: (n, days) => `(${n}× za ${days} dní)`,
+    customMoodSection: (days) =>
+      `## Nálada a zápisky (posledních ${days} dní, 1=nejlepší, 5=nejhorší)`,
     customMoodNoteLabel: "poznámka",
-    customCycleSection: "## Menstruační cyklus (posledních 30 dní)",
+    customCycleSection: (days) => `## Menstruační cyklus (posledních ${days} dní)`,
     customNoQuestion: "(žádná otázka)",
   },
   en: {
@@ -333,12 +346,12 @@ const STRINGS: Record<Locale, PromptStrings> = {
     skincareRoutineNote:
       "Products are in their time slots intentionally. Do not suggest timing changes unless asked — except for safety contraindications or critical mistakes (e.g. retinol + AHA in the morning).",
     skincareRoutineEmpty: "- (no products in routine yet)",
-    skincareLast30Section: "## Last 30 days",
+    skincareLast30Section: (days) => `## Last ${days} days`,
     skincareMoodAvg: (val) => `- average mood (1=best, 5=worst): ${val}`,
     skincarePeriodRecords: (n) => `- menstruation records: ${n}`,
-    skincareObsSection: "## Skin observations (last 30 days)",
+    skincareObsSection: (days) => `## Skin observations (last ${days} days)`,
     skincareObsEmpty: "- (no relevant tags)",
-    skincareObsCount: (n) => `(${n}× in 30 days)`,
+    skincareObsCount: (n, days) => `(${n}× in ${days} days)`,
     skincareQuestion:
       "What would you recommend changing, adding or removing from my routine? What might explain my recent skin observations?",
     supplementsTitle: "# Supplement advice request",
@@ -348,14 +361,15 @@ const STRINGS: Record<Locale, PromptStrings> = {
     supplementsRoutineNote:
       "Supplements are in their time slots intentionally — I know when to take what. Do not suggest timing changes unless asked — except for safety contraindications or critical mistakes (e.g. substances that block each other's absorption).",
     supplementsRoutineEmpty: "- (no supplements in routine yet)",
-    supplementsUsageSection: "## Actual usage (last 30 days)",
-    supplementsUsageCount: (n) => `${n}× in 30 days`,
+    supplementsUsageSection: (days) => `## Actual usage (last ${days} days)`,
+    supplementsUsageCount: (n, days) => `${n}× in ${days} days`,
     supplementsQuestion:
       "Is my dosage reasonable? Do the substances combine well with each other and with food? Is anything missing or unnecessary? Do you see a pattern of inconsistency in actual usage? Do not suggest timing changes unless there is a contraindication or critical mistake.",
     correlationTitle: "# Pattern analysis request (correlation)",
     correlationLibrarySkinSection: "## Library — skincare",
     correlationLibrarySupplementSection: "## Library — supplements",
-    correlationDataSection: "## Data (60 days, 1=best mood, 5=worst)",
+    correlationDataSection: (days) =>
+      `## Data (${days} days, 1=best mood, 5=worst)`,
     correlationDataEmpty: "- (no data)",
     correlationLibraryNone: "- (none)",
     correlationPeriodLabel: "period",
@@ -363,13 +377,13 @@ const STRINGS: Record<Locale, PromptStrings> = {
     correlationUsedLabel: "used",
     correlationQuestion:
       "Please find patterns: on which days my mood is worse, whether it correlates with my cycle, specific products (see composition in library), supplements, habits or observations. Do you see recurring combinations worth noting?",
-    weeklyTitle: "# Weekly reflection (7 days)",
+    weeklyTitle: (days) => `# ${days}-day reflection`,
     weeklyRoutineSection: (n) => `## Intentional routine (${n} items)`,
     weeklyRoutineNote:
       "Items are in their time slots intentionally. Do not suggest timing changes unless asked — except for safety contraindications or critical mistakes.",
     weeklyRoutineEmpty: "- (none)",
     weeklyDaysSection: "## Actual days",
-    weeklyDaysEmpty: "- (no data for the last 7 days)",
+    weeklyDaysEmpty: (days) => `- (no data for the last ${days} days)`,
     weeklyDoneLabel: "done",
     weeklyPeriodLabel: "period",
     weeklyTagsLabel: "tags",
@@ -394,12 +408,13 @@ const STRINGS: Record<Locale, PromptStrings> = {
       "Habits are in their time slots intentionally. Do not suggest timing changes unless asked.",
     customHabitsLibraryEmpty: "- (no habits)",
     customHabitsRoutineEmpty: "- (no habits in routine)",
-    customObsSection: "## Observations / tags (last 30 days)",
+    customObsSection: (days) => `## Observations / tags (last ${days} days)`,
     customObsEmpty: "- (no records)",
-    customObsCount: (n) => `(${n}× in 30 days)`,
-    customMoodSection: "## Mood & notes (last 30 days, 1=best, 5=worst)",
+    customObsCount: (n, days) => `(${n}× in ${days} days)`,
+    customMoodSection: (days) =>
+      `## Mood & notes (last ${days} days, 1=best, 5=worst)`,
     customMoodNoteLabel: "note",
-    customCycleSection: "## Menstrual cycle (last 30 days)",
+    customCycleSection: (days) => `## Menstrual cycle (last ${days} days)`,
     customNoQuestion: "(no question)",
   },
 };
@@ -635,7 +650,11 @@ function dataContextBlock(ctx: DataContext, s: PromptStrings): string {
 
 // ─── prompt builders ────────────────────────────────────────────
 
-async function buildSkincare(supabase: SupabaseClient, locale: Locale): Promise<string> {
+async function buildSkincare(
+  supabase: SupabaseClient,
+  locale: Locale,
+  periodDays: number,
+): Promise<string> {
   const s = STRINGS[locale];
   const sl = SLOT_LABEL[locale];
 
@@ -672,7 +691,7 @@ async function buildSkincare(supabase: SupabaseClient, locale: Locale): Promise<
       return [head];
     });
 
-  const fromISO = daysAgo(30);
+  const fromISO = daysAgo(periodDays);
   const [notes, tags, cycles, dataCtx] = await Promise.all([
     loadNotes(supabase, fromISO),
     loadDailyTagsWithNames(supabase, fromISO),
@@ -687,7 +706,7 @@ async function buildSkincare(supabase: SupabaseClient, locale: Locale): Promise<
   for (const t of skinTags) tagCount.set(t.name, (tagCount.get(t.name) ?? 0) + 1);
   const tagLines = [...tagCount.entries()]
     .sort((a, b) => b[1] - a[1])
-    .map(([name, n]) => `- ${name} ${s.skincareObsCount(n)}`);
+    .map(([name, n]) => `- ${name} ${s.skincareObsCount(n, periodDays)}`);
 
   const moodAvg = notes
     .filter((n) => n.mood != null)
@@ -707,11 +726,11 @@ async function buildSkincare(supabase: SupabaseClient, locale: Locale): Promise<
     "",
     dataContextBlock(dataCtx, s),
     "",
-    s.skincareLast30Section,
+    s.skincareLast30Section(periodDays),
     s.skincareMoodAvg(moodAvg ? moodAvg.toFixed(1) : "—"),
     s.skincarePeriodRecords(cycles.length),
     "",
-    s.skincareObsSection,
+    s.skincareObsSection(periodDays),
     tagLines.length ? tagLines.join("\n") : s.skincareObsEmpty,
     "",
     s.questionSection,
@@ -719,7 +738,11 @@ async function buildSkincare(supabase: SupabaseClient, locale: Locale): Promise<
   ]);
 }
 
-async function buildSupplements(supabase: SupabaseClient, locale: Locale): Promise<string> {
+async function buildSupplements(
+  supabase: SupabaseClient,
+  locale: Locale,
+  periodDays: number,
+): Promise<string> {
   const s = STRINGS[locale];
   const sl = SLOT_LABEL[locale];
 
@@ -729,7 +752,7 @@ async function buildSupplements(supabase: SupabaseClient, locale: Locale): Promi
     loadBrandsMap(supabase, "supplement_brands"),
     loadActiveRoutine(supabase),
   ]);
-  const fromISO = daysAgo(30);
+  const fromISO = daysAgo(periodDays);
   const [logs, dataCtx] = await Promise.all([
     loadLogs(supabase, fromISO),
     loadDataContext(supabase, fromISO),
@@ -770,7 +793,7 @@ async function buildSupplements(supabase: SupabaseClient, locale: Locale): Promi
   }
   const usageLines = [...usageByName.entries()]
     .sort((a, b) => b[1] - a[1])
-    .map(([name, n]) => `- ${name}: ${s.supplementsUsageCount(n)}`);
+    .map(([name, n]) => `- ${name}: ${s.supplementsUsageCount(n, periodDays)}`);
 
   return joinLines([
     s.supplementsTitle,
@@ -786,7 +809,7 @@ async function buildSupplements(supabase: SupabaseClient, locale: Locale): Promi
     "",
     dataContextBlock(dataCtx, s),
     "",
-    s.supplementsUsageSection,
+    s.supplementsUsageSection(periodDays),
     usageLines.length ? usageLines.join("\n") : s.noRecords,
     "",
     s.questionSection,
@@ -794,13 +817,17 @@ async function buildSupplements(supabase: SupabaseClient, locale: Locale): Promi
   ]);
 }
 
-async function buildCorrelation(supabase: SupabaseClient, locale: Locale): Promise<string> {
+async function buildCorrelation(
+  supabase: SupabaseClient,
+  locale: Locale,
+  periodDays: number,
+): Promise<string> {
   const s = STRINGS[locale];
   const sl = SLOT_LABEL[locale];
   const il = INTENSITY_LABEL[locale];
 
   const { text: profileText } = await buildProfileBlock(supabase, s, locale);
-  const fromISO = daysAgo(60);
+  const fromISO = daysAgo(periodDays);
 
   const [products, supplements, habits, logs, notes, cycles, tags, dataCtx] =
     await Promise.all([
@@ -890,7 +917,7 @@ async function buildCorrelation(supabase: SupabaseClient, locale: Locale): Promi
     "",
     dataContextBlock(dataCtx, s),
     "",
-    s.correlationDataSection,
+    s.correlationDataSection(periodDays),
     dayLines.length ? dayLines.join("\n") : s.correlationDataEmpty,
     "",
     s.questionSection,
@@ -898,13 +925,17 @@ async function buildCorrelation(supabase: SupabaseClient, locale: Locale): Promi
   ]);
 }
 
-async function buildWeekly(supabase: SupabaseClient, locale: Locale): Promise<string> {
+async function buildWeekly(
+  supabase: SupabaseClient,
+  locale: Locale,
+  periodDays: number,
+): Promise<string> {
   const s = STRINGS[locale];
   const sl = SLOT_LABEL[locale];
   const il = INTENSITY_LABEL[locale];
 
   const { text: profileText } = await buildProfileBlock(supabase, s, locale);
-  const fromISO = daysAgo(7);
+  const fromISO = daysAgo(periodDays);
 
   const [products, supplements, habits, routine, logs, notes, cycles, tags, dataCtx] =
     await Promise.all([
@@ -988,7 +1019,7 @@ async function buildWeekly(supabase: SupabaseClient, locale: Locale): Promise<st
     });
 
   return joinLines([
-    s.weeklyTitle,
+    s.weeklyTitle(periodDays),
     "",
     profileText,
     "",
@@ -999,7 +1030,7 @@ async function buildWeekly(supabase: SupabaseClient, locale: Locale): Promise<st
     planLines.length ? planLines.join("\n") : s.weeklyRoutineEmpty,
     "",
     s.weeklyDaysSection,
-    dayLines.length ? dayLines.join("\n") : s.weeklyDaysEmpty,
+    dayLines.length ? dayLines.join("\n") : s.weeklyDaysEmpty(periodDays),
     "",
     s.questionSection,
     s.weeklyQuestion,
@@ -1010,14 +1041,15 @@ async function buildWeekly(supabase: SupabaseClient, locale: Locale): Promise<st
 
 export async function buildCustomPrompt(
   supabase: SupabaseClient,
-  customPrompt: { question: string; data_blocks: DataBlock[] },
+  customPrompt: { question: string; data_blocks: DataBlock[]; period_days: number },
   locale: Locale,
 ): Promise<string> {
   const s = STRINGS[locale];
   const sl = SLOT_LABEL[locale];
   const il = INTENSITY_LABEL[locale];
   const blocks = new Set(customPrompt.data_blocks);
-  const fromISO = daysAgo(30);
+  const periodDays = customPrompt.period_days;
+  const fromISO = daysAgo(periodDays);
   const needsRoutine =
     blocks.has("products") || blocks.has("supplements") || blocks.has("habits");
 
@@ -1165,10 +1197,10 @@ export async function buildCustomPrompt(
     for (const t of tags) tagCount.set(t.name, (tagCount.get(t.name) ?? 0) + 1);
     const tagLines = [...tagCount.entries()]
       .sort((a, b) => b[1] - a[1])
-      .map(([name, n]) => `- ${name} ${s.customObsCount(n)}`);
+      .map(([name, n]) => `- ${name} ${s.customObsCount(n, periodDays)}`);
     parts.push(
       "",
-      s.customObsSection,
+      s.customObsSection(periodDays),
       tagLines.length ? tagLines.join("\n") : s.customObsEmpty,
     );
   }
@@ -1184,7 +1216,7 @@ export async function buildCustomPrompt(
       });
     parts.push(
       "",
-      s.customMoodSection,
+      s.customMoodSection(periodDays),
       moodLines.length ? moodLines.join("\n") : s.noRecords,
     );
   }
@@ -1195,7 +1227,7 @@ export async function buildCustomPrompt(
     );
     parts.push(
       "",
-      s.customCycleSection,
+      s.customCycleSection(periodDays),
       cycleLines.length ? cycleLines.join("\n") : s.noRecords,
     );
   }
@@ -1215,15 +1247,16 @@ export async function buildPrompt(
   supabase: SupabaseClient,
   type: PromptType,
   locale: Locale,
+  periodDays: number = DEFAULT_PERIOD_DAYS[type],
 ): Promise<string> {
   switch (type) {
     case "skincare":
-      return buildSkincare(supabase, locale);
+      return buildSkincare(supabase, locale, periodDays);
     case "supplements":
-      return buildSupplements(supabase, locale);
+      return buildSupplements(supabase, locale, periodDays);
     case "correlation":
-      return buildCorrelation(supabase, locale);
+      return buildCorrelation(supabase, locale, periodDays);
     case "weekly":
-      return buildWeekly(supabase, locale);
+      return buildWeekly(supabase, locale, periodDays);
   }
 }

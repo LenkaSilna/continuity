@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 export const fieldInputCn =
-  "w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900";
+  "w-full rounded-md border border-(--border) bg-(--surface) px-3 py-2 text-(--text)";
 
 export function FormField({
   label,
@@ -15,7 +15,7 @@ export function FormField({
   return (
     <label className="block space-y-1">
       <span className="text-xs font-medium">{label}</span>
-      {hint && <span className="block text-xs text-zinc-500">{hint}</span>}
+      {hint && <span className="block text-xs text-(--text-muted)">{hint}</span>}
       {children}
     </label>
   );

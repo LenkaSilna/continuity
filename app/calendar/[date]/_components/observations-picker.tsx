@@ -114,13 +114,13 @@ export function ObservationsPicker({
   const assigned = allTags.filter((tag) => localAssigned.has(tag.id));
 
   return (
-    <section className="space-y-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
+    <section className="space-y-3 rounded-(--cui-radius-xl) border border-(--border) bg-(--surface) p-4 shadow-(--cui-shadow-sm)">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-(--text-muted)">
         {t.calendar.day.observations.title}
       </h2>
 
       {assigned.length === 0 ? (
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs text-(--text-muted)">
           {t.calendar.day.observations.empty}
         </p>
       ) : (
@@ -131,15 +131,15 @@ export function ObservationsPicker({
                 type="button"
                 disabled={isPending}
                 onClick={() => handleDetach(tag.id)}
-                className="inline-flex h-8 items-center gap-1.5 rounded-full border border-zinc-300 px-3 text-sm hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
+                className="inline-flex h-8 items-center gap-1.5 rounded-(--cui-radius-full) border border-(--border) px-3 text-sm transition-colors hover:bg-(--surface-2) disabled:opacity-50"
               >
                 <span
                   aria-hidden
-                  className="h-2 w-2 rounded-full border border-zinc-300 dark:border-zinc-700"
+                  className="h-2 w-2 rounded-full border border-(--border)"
                   style={{ backgroundColor: tag.color ?? "transparent" }}
                 />
                 {tag.name}
-                <span aria-hidden className="text-zinc-400">
+                <span aria-hidden className="text-(--text-soft)">
                   ×
                 </span>
               </button>
@@ -155,7 +155,7 @@ export function ObservationsPicker({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t.calendar.day.observations.addPlaceholder}
-          className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          className="w-full rounded-md border border-(--border) bg-(--surface) px-3 py-2 text-sm text-(--text)"
           autoComplete="off"
         />
 
@@ -167,11 +167,11 @@ export function ObservationsPicker({
                   type="button"
                   disabled={isPending}
                   onClick={() => handleAttach(tag.id)}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-full border border-dashed border-zinc-300 px-3 text-sm text-zinc-600 hover:border-zinc-500 hover:text-zinc-900 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-500 dark:hover:text-zinc-100"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-(--cui-radius-full) border border-dashed border-(--border) px-3 text-sm text-(--text-muted) transition-colors hover:border-(--accent-border) hover:text-(--text) disabled:opacity-50"
                 >
                   <span
                     aria-hidden
-                    className="h-2 w-2 rounded-full border border-zinc-300 dark:border-zinc-700"
+                    className="h-2 w-2 rounded-full border border-(--border)"
                     style={{ backgroundColor: tag.color ?? "transparent" }}
                   />
                   + {tag.name}
@@ -185,7 +185,7 @@ export function ObservationsPicker({
           <button
             type="submit"
             disabled={isCreating}
-            className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs text-zinc-700 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+            className="rounded-md border border-(--border) px-3 py-1.5 text-xs text-(--text-muted) transition-colors hover:bg-(--surface-2) disabled:opacity-50"
           >
             + {t.calendar.day.observations.createNew}: <strong>{trimmed}</strong>
           </button>

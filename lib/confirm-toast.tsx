@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+import { Button } from "@/app/_components/button";
 
 type ConfirmToastOptions = {
   message: string;
@@ -17,21 +18,17 @@ export function confirmToast({
 }: ConfirmToastOptions): void {
   toast.custom(
     (id) => (
-      <div className="flex w-full items-center justify-between gap-4 rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm shadow-md dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="flex w-full items-center justify-between gap-4 rounded-(--cui-radius-xl) border border-(--border) bg-(--surface) px-4 py-3 text-sm shadow-(--cui-shadow-md)">
         <div className="min-w-0">
-          <p className="font-medium text-zinc-900 dark:text-zinc-50">{message}</p>
+          <p className="font-medium text-(--text)">{message}</p>
           {detail && (
-            <p className="mt-0.5 truncate text-xs text-zinc-500 dark:text-zinc-400">{detail}</p>
+            <p className="mt-0.5 truncate text-xs text-(--text-muted)">{detail}</p>
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <button
-            type="button"
-            onClick={() => toast.dismiss(id)}
-            className="h-8 rounded-md bg-zinc-100 px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-          >
+          <Button type="button" variant="ghost" size="sm" onClick={() => toast.dismiss(id)}>
             {cancelLabel}
-          </button>
+          </Button>
           <button
             type="button"
             onClick={async () => {
@@ -42,7 +39,7 @@ export function confirmToast({
                 console.error("Confirm action failed:", error);
               }
             }}
-            className="h-8 rounded-md bg-zinc-900 px-3 text-xs font-medium text-zinc-50 hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+            className="h-9.5 rounded-(--cui-radius-full) bg-red-600 px-4 text-xs font-semibold text-white transition-colors hover:bg-red-700 dark:bg-red-600 dark:hover:bg-red-500"
           >
             {confirmLabel}
           </button>

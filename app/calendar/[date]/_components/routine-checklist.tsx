@@ -78,13 +78,13 @@ export function RoutineChecklist({
   };
 
   return (
-    <section className="space-y-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
+    <section className="space-y-3 rounded-(--cui-radius-xl) border border-(--border) bg-(--surface) p-4 shadow-(--cui-shadow-sm)">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-(--text-muted)">
         {t.calendar.day.routine.title}
       </h2>
 
       {allEmpty ? (
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-(--text-muted)">
           {t.calendar.day.routine.empty}
         </p>
       ) : (
@@ -93,11 +93,11 @@ export function RoutineChecklist({
             const items = slots[slot];
             return (
               <div key={slot} className="space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-(--text-soft)">
                   {slotLabels[slot]}
                 </h3>
                 {items.length === 0 ? (
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-xs text-(--text-muted)">
                     {t.calendar.day.routine.slotEmpty}
                   </p>
                 ) : (
@@ -119,7 +119,7 @@ export function RoutineChecklist({
                               "flex w-full min-h-[44px] items-center gap-3 rounded-md border px-3 py-2 text-left text-sm transition disabled:opacity-50",
                               checked
                                 ? "border-emerald-300 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/30"
-                                : "border-zinc-200 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900",
+                                : "border-(--border) hover:bg-(--surface-2)",
                             ].join(" ")}
                           >
                             <span
@@ -128,7 +128,7 @@ export function RoutineChecklist({
                                 "grid h-5 w-5 shrink-0 place-items-center rounded border",
                                 checked
                                   ? "border-emerald-600 bg-emerald-600 text-white"
-                                  : "border-zinc-300 dark:border-zinc-700",
+                                  : "border-(--border)",
                               ].join(" ")}
                             >
                               {checked ? (

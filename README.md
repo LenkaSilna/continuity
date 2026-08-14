@@ -89,7 +89,9 @@ When `VITE_ALLOWED_EMAILS` is empty: open in development, **blocked in productio
 ```text
 src/
   main.tsx                    ← entry point: QueryClient + RouterProvider + Toaster
-  fonts.css                   ← Geist variable font @font-face declarations
+  fonts.css                   ← self-hosted fonts: Sora/Inter/DM Sans (@fontsource-variable)
+                                 + Geist Mono (@font-face, still used for monospace)
+  tokens.css                  ← design tokens — see "Design system" below
   router.tsx                  ← TanStack Router route tree (all routes defined here)
   vite-env.d.ts               ← import.meta.env types
   pages/
@@ -117,8 +119,10 @@ src/
       SupplementsPage.tsx
       SupplementDetailPage.tsx
 app/
-  globals.css                 ← Tailwind + safe-area + mobile tap targets
+  globals.css                 ← Tailwind + tokens.css bridge + safe-area + mobile tap targets
   _components/                ← shared UI components (no Next.js dependencies)
+    button.tsx, card.tsx      ← primitives — see "Design system" below
+    toggle.tsx, toggle-chip.tsx, period-select.tsx
   ai/_components/             ← AiTabs, PromptEditor
   ai/custom/_components/      ← CustomPromptForm
   calendar/_components/       ← CalendarHeader, MonthView, WeekView, DayCell
@@ -141,8 +145,8 @@ lib/
   i18n/                       ← cs + en dictionary, localStorage locale
   modules.ts                  ← getModuleFlags helper
   calendar.ts                 ← month/week date math + mood colour
-  theme.ts                    ← accent palette + helpers
-  appearance.ts               ← apply theme/accent to DOM + localStorage
+  theme.ts                    ← accent ↔ data-theme mapping + hue/chroma for swatches
+  appearance.ts               ← apply theme/accent to <html> (data-mode/data-theme + .dark) + localStorage
   ai-prompts.ts               ← prompt builders (4 predefined + buildCustomPrompt)
   types.ts                    ← DB row types, DataBlock, CustomPrompt, ActionState
   skin-types.ts               ← preset skin types + gender constants

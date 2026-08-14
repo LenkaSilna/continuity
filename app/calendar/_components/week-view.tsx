@@ -21,7 +21,7 @@ export function WeekView({
 
   return (
     <div className="space-y-1">
-      <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-zinc-500">
+      <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-(--text-muted)">
         {weekdaysShort.map((d) => (
           <div key={d}>{d}</div>
         ))}

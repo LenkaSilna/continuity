@@ -37,37 +37,37 @@ export function ProductsList({
         return (
           <li
             key={p.id}
-            className="flex items-start justify-between gap-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
+            className="flex items-start justify-between gap-3 rounded-(--cui-radius-xl) border border-(--border) bg-(--surface) p-4 shadow-(--cui-shadow-sm)"
           >
             <div className="min-w-0 flex-1 space-y-1">
               <div className="flex flex-wrap items-baseline gap-x-2">
                 <span className="font-medium">{p.name}</span>
-                <span className="text-sm text-zinc-500">
+                <span className="text-sm text-(--text-muted)">
                   {bn || t.library.products.card.noBrand}
                 </span>
               </div>
               {tn && (
-                <span className="inline-block rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                <span className="inline-block rounded-full bg-(--surface-2) px-2 py-0.5 text-xs text-(--text-muted)">
                   {tn}
                 </span>
               )}
               {p.active_ingredients && (
-                <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                <p className="text-xs text-(--text-muted)">
                   {p.active_ingredients}
                 </p>
               )}
               {p.inci && (
                 <details className="text-xs">
-                  <summary className="cursor-pointer text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
+                  <summary className="cursor-pointer text-(--text-muted) transition-colors hover:text-(--text)">
                     INCI
                   </summary>
-                  <p className="mt-1 whitespace-pre-wrap wrap-break-word font-mono text-[11px] text-zinc-600 dark:text-zinc-400">
+                  <p className="mt-1 whitespace-pre-wrap wrap-break-word font-mono text-[11px] text-(--text-muted)">
                     {p.inci}
                   </p>
                 </details>
               )}
               {p.notes && (
-                <p className="whitespace-pre-wrap text-xs text-zinc-500 dark:text-zinc-500">
+                <p className="whitespace-pre-wrap text-xs text-(--text-muted)">
                   {p.notes}
                 </p>
               )}

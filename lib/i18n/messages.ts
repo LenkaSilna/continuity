@@ -413,6 +413,10 @@ const cs = {
         desc: "Shrnutí posledních 7 dní — kde jsem byla konzistentní, kde ne.",
       },
     },
+    period: {
+      label: "Časové období",
+      days: (n: number) => `${n} dní`,
+    },
     detail: {
       hint: "Můžeš text upravit a pak zkopírovat.",
       copy: "Kopírovat",
@@ -935,6 +939,10 @@ const en: Messages = {
         title: "Weekly reflection",
         desc: "Last 7 days summary — where you stayed consistent, where you didn't.",
       },
+    },
+    period: {
+      label: "Time period",
+      days: (n: number) => `${n} days`,
     },
     detail: {
       hint: "You can edit the text and then copy.",

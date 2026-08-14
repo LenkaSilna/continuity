@@ -48,7 +48,7 @@ export function AddObservationForm({ categories }: { categories: string[] }) {
     <form
       ref={formRef}
       action={formAction}
-      className="space-y-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
+      className="space-y-3 rounded-(--cui-radius-xl) border border-(--border) bg-(--surface) p-4 shadow-(--cui-shadow-sm)"
     >
       <h3 className="text-sm font-semibold uppercase tracking-wide">
         {t.library.observations.add}
@@ -86,9 +86,9 @@ export function AddObservationForm({ categories }: { categories: string[] }) {
           type="color"
           name="color"
           defaultValue="#a78bfa"
-          className="h-9 w-12 cursor-pointer rounded-md border border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-900"
+          className="h-9 w-12 cursor-pointer rounded-md border border-(--border) bg-(--surface)"
         />
-        <span className="text-xs text-zinc-500">
+        <span className="text-xs text-(--text-muted)">
           {t.library.observations.form.colorHint}
         </span>
       </label>

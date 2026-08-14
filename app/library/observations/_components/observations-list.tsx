@@ -22,17 +22,17 @@ export function ObservationsList({ tags }: { tags: Tag[] }) {
       {tags.map((tag) => (
         <li
           key={tag.id}
-          className="flex items-start justify-between gap-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
+          className="flex items-start justify-between gap-3 rounded-(--cui-radius-xl) border border-(--border) bg-(--surface) p-4 shadow-(--cui-shadow-sm)"
         >
           <div className="flex min-w-0 flex-1 items-start gap-3">
             <span
               aria-hidden
-              className="mt-1 inline-block h-3 w-3 shrink-0 rounded-full border border-zinc-300 dark:border-zinc-700"
+              className="mt-1 inline-block h-3 w-3 shrink-0 rounded-full border border-(--border)"
               style={{ backgroundColor: tag.color ?? "transparent" }}
             />
             <div className="min-w-0 space-y-0.5">
               <span className="font-medium">{tag.name}</span>
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-(--text-muted)">
                 {tag.category ?? t.library.observations.card.noCategory}
               </p>
             </div>

@@ -5,6 +5,13 @@ import { useI18n } from "@/lib/i18n/client";
 import { GENDERS, SKIN_TYPES } from "@/lib/skin-types";
 import type { Lifestyle, Profile } from "@/lib/types";
 import { showError, showSuccess } from "@/lib/toast";
+import { Button } from "@/app/_components/button";
+
+const inputCn =
+  "w-full rounded-md border border-(--border) bg-(--surface) px-3 py-2.5 text-(--text)";
+
+const radioChipCn =
+  "flex cursor-pointer items-center gap-2 rounded-(--cui-radius-full) border border-(--border) px-4 py-2 text-sm text-(--text-muted) transition-colors has-[input:checked]:border-transparent has-[input:checked]:bg-accent has-[input:checked]:text-(--on-accent)";
 
 const LIFESTYLES: readonly Lifestyle[] = [
   "sedentary",
@@ -80,7 +87,7 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
           defaultValue={profile?.name ?? ""}
           placeholder={t.profile.namePlaceholder}
           autoComplete="given-name"
-          className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2.5 dark:border-zinc-700 dark:bg-zinc-900"
+          className={inputCn}
         />
       </label>
 
@@ -88,7 +95,7 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
         <span className="text-sm font-medium">
           {t.profile.dateOfBirth}
           {age !== null && (
-            <span className="ml-2 text-xs font-normal text-zinc-500">
+            <span className="ml-2 text-xs font-normal text-(--text-muted)">
               ({t.profile.age} {age})
             </span>
           )}
@@ -98,7 +105,7 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
           type="date"
           value={dob}
           onChange={(e) => setDob(e.target.value)}
-          className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2.5 dark:border-zinc-700 dark:bg-zinc-900"
+          className={inputCn}
         />
       </label>
 
@@ -106,10 +113,7 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
         <legend className="text-sm font-medium">{t.profile.gender}</legend>
         <div className="flex flex-wrap gap-2">
           {GENDERS.map((g) => (
-            <label
-              key={g}
-              className="flex cursor-pointer items-center gap-2 rounded-full border border-zinc-300 px-4 py-2 text-sm has-[input:checked]:border-zinc-900 has-[input:checked]:bg-zinc-900 has-[input:checked]:text-zinc-50 dark:border-zinc-700 dark:has-[input:checked]:border-zinc-100 dark:has-[input:checked]:bg-zinc-100 dark:has-[input:checked]:text-zinc-900"
-            >
+            <label key={g} className={radioChipCn}>
               <input
                 type="radio"
                 name="gender"
@@ -126,7 +130,7 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium">
           {t.profile.skinTypes}{" "}
-          <span className="text-zinc-500">{t.profile.skinTypesHint}</span>
+          <span className="text-(--text-muted)">{t.profile.skinTypesHint}</span>
         </legend>
 
         <div className="grid gap-2 sm:grid-cols-2">
@@ -139,10 +143,10 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
                 aria-pressed={active}
                 onClick={() => toggleSkinType(skin)}
                 className={[
-                  "flex min-h-[44px] cursor-pointer items-center justify-center rounded-full border px-4 py-2 text-sm transition",
+                  "flex min-h-[44px] cursor-pointer items-center justify-center rounded-(--cui-radius-full) border px-4 py-2 text-sm transition-colors",
                   active
-                    ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
-                    : "border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900",
+                    ? "border-transparent bg-accent text-(--on-accent)"
+                    : "border-(--border) text-(--text-muted) hover:border-(--accent-border) hover:text-(--text)",
                 ].join(" ")}
               >
                 {t.skinTypes[skin]}
@@ -156,7 +160,7 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
               aria-pressed
               aria-label={`${t.profile.skinTypesCustom.removeLabel} ${s}`}
               onClick={() => toggleSkinType(s)}
-              className="flex min-h-[44px] cursor-pointer items-center justify-center gap-1.5 rounded-full border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm text-zinc-50 transition dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+              className="flex min-h-[44px] cursor-pointer items-center justify-center gap-1.5 rounded-(--cui-radius-full) border border-transparent bg-accent px-4 py-2 text-sm text-(--on-accent) transition-colors"
             >
               {s}
               <span aria-hidden className="opacity-60">
@@ -178,28 +182,26 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
               }
             }}
             placeholder={t.profile.skinTypesCustom.placeholder}
-            className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="flex-1 rounded-md border border-(--border) bg-(--surface) px-3 py-2 text-sm text-(--text)"
           />
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={addCustomSkinType}
             disabled={!newSkinType.trim()}
-            className="rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
           >
             {t.profile.skinTypesCustom.add}
-          </button>
+          </Button>
         </div>
       </fieldset>
 
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium">{t.profile.lifestyle}</legend>
-        <p className="text-xs text-zinc-500">{t.profile.lifestyleHint}</p>
+        <p className="text-xs text-(--text-muted)">{t.profile.lifestyleHint}</p>
         <div className="flex flex-wrap gap-2">
           {LIFESTYLES.map((l) => (
-            <label
-              key={l}
-              className="flex cursor-pointer items-center gap-2 rounded-full border border-zinc-300 px-4 py-2 text-sm has-[input:checked]:border-zinc-900 has-[input:checked]:bg-zinc-900 has-[input:checked]:text-zinc-50 dark:border-zinc-700 dark:has-[input:checked]:border-zinc-100 dark:has-[input:checked]:bg-zinc-100 dark:has-[input:checked]:text-zinc-900"
-            >
+            <label key={l} className={radioChipCn}>
               <input
                 type="radio"
                 name="lifestyle"
@@ -221,18 +223,14 @@ export function ProfileForm({ profile }: { profile: Profile | null }) {
           min={0}
           max={20}
           defaultValue={profile?.children_count ?? 0}
-          className="block w-full rounded-md border border-zinc-300 bg-white px-3 py-2.5 dark:border-zinc-700 dark:bg-zinc-900 sm:w-32"
+          className={`sm:w-32 ${inputCn}`}
         />
       </label>
 
-      <div className="safe-bottom sticky bottom-0 -mx-4 flex flex-wrap items-center gap-3 border-t border-zinc-200 bg-[var(--background)]/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 dark:border-zinc-800 ">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="inline-flex h-11 flex-1 items-center justify-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-zinc-50 disabled:opacity-50 sm:flex-none sm:px-6 dark:bg-zinc-100 dark:text-zinc-900"
-        >
+      <div className="safe-bottom sticky bottom-0 -mx-4 flex flex-wrap items-center gap-3 border-t border-(--border) bg-background/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
+        <Button type="submit" disabled={isPending} className="flex-1 sm:flex-none">
           {isPending ? t.common.saving : t.common.save}
-        </button>
+        </Button>
       </div>
     </form>
   );

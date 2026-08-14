@@ -13,10 +13,10 @@ export function TopNav({ rightSlot }: { rightSlot?: React.ReactNode }) {
   });
 
   return (
-    <header className="safe-top sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-zinc-200 bg-[var(--background)]/80 px-4 py-2 backdrop-blur dark:border-zinc-800">
+    <header className="safe-top sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-(--border) bg-background/80 px-4 py-2 backdrop-blur">
       <Link
         to="/dashboard"
-        className="-mx-2 inline-flex items-center rounded-md px-2 py-1 text-2xl font-semibold tracking-tight transition hover:bg-zinc-100 dark:hover:bg-zinc-900"
+        className="font-display -mx-2 inline-flex items-center rounded-md px-2 py-1 text-2xl font-semibold tracking-tight text-(--text) transition-colors hover:bg-(--surface-2)"
       >
         Continuity
       </Link>

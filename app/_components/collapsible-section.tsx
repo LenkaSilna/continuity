@@ -15,7 +15,7 @@ export function CollapsibleSection({
   const contentId = `collapsible-${title.toLowerCase().replace(/\s+/g, "-")}`;
 
   return (
-    <section className="rounded-lg border border-zinc-200 dark:border-zinc-800">
+    <section className="rounded-lg border border-(--border)">
       <button
         type="button"
         aria-expanded={open}
@@ -24,18 +24,18 @@ export function CollapsibleSection({
         className="flex w-full items-center justify-between gap-3 p-4 text-left"
       >
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wide">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-(--text)">
             {title}
           </h2>
-          <p className="mt-0.5 text-xs text-zinc-500">{subtitle}</p>
+          <p className="mt-0.5 text-xs text-(--text-muted)">{subtitle}</p>
         </div>
-        <span className="text-xl text-zinc-400" aria-hidden>
+        <span className="text-xl text-(--text-soft)" aria-hidden>
           {open ? "−" : "+"}
         </span>
       </button>
 
       {open && (
-        <div id={contentId} className="space-y-3 border-t border-zinc-200 p-4 dark:border-zinc-800">
+        <div id={contentId} className="space-y-3 border-t border-(--border) p-4">
           {children}
         </div>
       )}

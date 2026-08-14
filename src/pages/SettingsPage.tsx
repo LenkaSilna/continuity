@@ -42,7 +42,7 @@ export function SettingsPage() {
     navigate({ to: "/profile" });
     return (
       <main className="flex min-h-screen items-center justify-center">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-(--border) border-t-accent" />
       </main>
     );
   }
@@ -53,8 +53,10 @@ export function SettingsPage() {
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-5 px-4 py-6 sm:px-6 sm:py-10">
         <header>
           <BackToDashboard />
-          <h1 className="text-2xl font-semibold tracking-tight">{t.settings.title}</h1>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t.settings.subtitle}</p>
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-(--text)">
+            {t.settings.title}
+          </h1>
+          <p className="mt-1 text-sm text-(--text-muted)">{t.settings.subtitle}</p>
         </header>
 
         {profile && <SettingsForm profile={profile} />}

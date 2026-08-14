@@ -34,8 +34,10 @@ export function AiPage() {
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-5 px-4 py-6 sm:px-6 sm:py-10">
         <header>
           <BackToDashboard />
-          <h1 className="text-2xl font-semibold tracking-tight">{t.ai.title}</h1>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{t.ai.subtitle}</p>
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-(--text)">
+            {t.ai.title}
+          </h1>
+          <p className="mt-1 text-sm text-(--text-muted)">{t.ai.subtitle}</p>
         </header>
 
         <AiTabs

@@ -172,6 +172,7 @@ export type CustomPrompt = {
   name: string;
   question: string;
   data_blocks: DataBlock[];
+  period_days: number;
   created_at: string;
   updated_at: string;
 };

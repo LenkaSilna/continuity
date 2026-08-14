@@ -11,7 +11,7 @@ export function AddDashedButton({
     <button
       type="button"
       onClick={onClick}
-      className="w-full rounded-md border-2 border-dashed border-zinc-300 px-4 py-3 text-sm font-medium text-zinc-600 hover:border-zinc-900 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-100 dark:hover:text-zinc-100"
+      className="w-full rounded-md border-2 border-dashed border-(--border) px-4 py-3 text-sm font-medium text-(--text-muted) transition-colors hover:border-(--accent-border) hover:text-(--accent-text)"
     >
       {children}
     </button>

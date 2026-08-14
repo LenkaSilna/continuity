@@ -3,53 +3,33 @@ import type { Accent, ThemeMode } from "./types";
 export const ACCENTS: readonly Accent[] = ["rose", "lavender", "mint"] as const;
 export const THEMES: readonly ThemeMode[] = ["light", "dark"] as const;
 
-// Dark mode keeps a clean neutral background; accent only colours active
-// elements (selected buttons, focus rings, the toggle "soft" highlight).
-// Matches --background in globals.css for the .dark scope.
-const DARK_BACKGROUND = "#0a0a0a";
+// tokens.css keys its accent colours off data-theme="lila|pink|mint", while
+// the app's own naming (DB schema, settings labels) stayed rose/lavender/mint.
+// This is the only place that bridges the two — "lavender" already reads as
+// "Lila" in the settings UI, so the mapping matches what users already see.
+export type DataTheme = "lila" | "pink" | "mint";
 
-type AccentPalette = {
-  hex: string;
-  softLight: string;
-  softDark: string;
-  tintLight: string;
+const ACCENT_DATA_THEME: Record<Accent, DataTheme> = {
+  rose: "pink",
+  lavender: "lila",
+  mint: "mint",
 };
 
-const ACCENT_MAP: Record<Accent, AccentPalette> = {
-  rose: {
-    hex: "#f43f5e",
-    softLight: "#ffe4e6",
-    softDark: "#4c0519",
-    tintLight: "#fff1f2",
-  },
-  lavender: {
-    hex: "#a78bfa",
-    softLight: "#ede9fe",
-    softDark: "#2e1065",
-    tintLight: "#f5f3ff",
-  },
-  mint: {
-    hex: "#10b981",
-    softLight: "#d1fae5",
-    softDark: "#022c22",
-    tintLight: "#ecfdf5",
-  },
+// Same hue/chroma tokens.css uses for --accent-h/--accent-c, so this swatch
+// colour matches the real accent exactly instead of drifting from it.
+const ACCENT_HUE_CHROMA: Record<Accent, { h: number; c: number }> = {
+  rose: { h: 356, c: 0.135 },
+  lavender: { h: 286, c: 0.155 },
+  mint: { h: 166, c: 0.11 },
 };
 
-export function accentVars(
-  accent: Accent,
-  theme: ThemeMode,
-): { background: string; accent: string; accentSoft: string } {
-  const p = ACCENT_MAP[accent];
-  return {
-    background: theme === "dark" ? DARK_BACKGROUND : p.tintLight,
-    accent: p.hex,
-    accentSoft: theme === "dark" ? p.softDark : p.softLight,
-  };
+export function dataThemeFor(accent: Accent): DataTheme {
+  return ACCENT_DATA_THEME[accent];
 }
 
 export function accentHex(accent: Accent): string {
-  return ACCENT_MAP[accent].hex;
+  const { h, c } = ACCENT_HUE_CHROMA[accent];
+  return `oklch(0.605 ${c} ${h})`;
 }
 
 export function isAccent(v: string | null | undefined): v is Accent {

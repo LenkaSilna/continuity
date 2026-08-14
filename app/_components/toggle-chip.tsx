@@ -12,10 +12,11 @@ export function ToggleChip({ label, active, onClick }: ToggleChipProps) {
       aria-pressed={active}
       onClick={onClick}
       className={[
-        "inline-flex h-8 items-center rounded-full border px-3 text-sm transition-colors",
+        "inline-flex h-8 items-center rounded-(--cui-radius-full) border px-(--space-4)",
+        "text-[length:var(--cui-text-sm)] font-medium transition-colors duration-(--cui-dur) ease-(--cui-ease)",
         active
-          ? "border-[var(--accent)] bg-[var(--accent-soft)] text-zinc-900 dark:text-zinc-100"
-          : "border-zinc-300 text-zinc-600 hover:border-zinc-500 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-zinc-500 dark:hover:text-zinc-100",
+          ? "border-transparent bg-accent text-(--on-accent)"
+          : "border-(--border) text-(--text-muted) hover:border-(--accent-border) hover:text-(--text)",
       ].join(" ")}
     >
       {label}

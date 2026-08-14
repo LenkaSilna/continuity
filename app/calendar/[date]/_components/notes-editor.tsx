@@ -36,13 +36,13 @@ export function NotesEditor({
   }, [value, date, queryClient, t.calendar.errors.generic]);
 
   return (
-    <section className="space-y-2 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+    <section className="space-y-2 rounded-(--cui-radius-xl) border border-(--border) bg-(--surface) p-4 shadow-(--cui-shadow-sm)">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-(--text-muted)">
           {t.calendar.day.notes.title}
         </h2>
         {isPending ? (
-          <span className="text-xs text-zinc-500">{t.common.saving}</span>
+          <span className="text-xs text-(--text-muted)">{t.common.saving}</span>
         ) : savedAt ? (
           <span className="text-xs text-emerald-600 dark:text-emerald-400">
             {t.common.saved}
@@ -54,7 +54,7 @@ export function NotesEditor({
         onChange={(e) => setValue(e.target.value)}
         rows={4}
         placeholder={t.calendar.day.notes.placeholder}
-        className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        className="w-full rounded-md border border-(--border) bg-(--surface) px-3 py-2 text-sm text-(--text)"
       />
     </section>
   );

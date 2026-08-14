@@ -47,12 +47,12 @@ export function MoodPicker({
   };
 
   return (
-    <section className="space-y-2 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+    <section className="space-y-2 rounded-(--cui-radius-xl) border border-(--border) bg-(--surface) p-4 shadow-(--cui-shadow-sm)">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-(--text-muted)">
           {t.calendar.day.mood.title}
         </h2>
-        <span className="text-xs text-zinc-500">{t.calendar.day.mood.hint}</span>
+        <span className="text-xs text-(--text-muted)">{t.calendar.day.mood.hint}</span>
       </div>
       <div className="flex flex-wrap gap-2">
         {levels.map((level) => {
@@ -67,13 +67,13 @@ export function MoodPicker({
               className={[
                 "flex min-h-[44px] min-w-[44px] flex-1 flex-col items-center justify-center rounded-md border px-2 py-2 text-xs transition disabled:opacity-50",
                 active
-                  ? "border-zinc-900 dark:border-zinc-100"
-                  : "border-zinc-200 hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600",
+                  ? "border-accent"
+                  : "border-(--border) hover:border-(--accent-border)",
               ].join(" ")}
               style={{ backgroundColor: moodColor(level) ?? undefined }}
             >
-              <span className="text-sm font-semibold text-zinc-900">{level}</span>
-              <span className="text-[10px] text-zinc-900/80">
+              <span className="text-sm font-semibold text-black">{level}</span>
+              <span className="text-[10px] text-black/80">
                 {labels[String(level) as keyof typeof labels]}
               </span>
             </button>
@@ -83,7 +83,7 @@ export function MoodPicker({
           type="button"
           disabled={isPending || localMood === null}
           onClick={() => handle(null)}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-xs text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-900"
+          className="rounded-md border border-(--border) px-3 py-2 text-xs text-(--text-muted) transition-colors hover:bg-(--surface-2) disabled:opacity-50"
         >
           {t.calendar.day.mood.clear}
         </button>

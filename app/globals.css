@@ -1,20 +1,24 @@
 @import "tailwindcss";
 
-/* User-controlled dark mode (via <html class="dark">) instead of media query. */
+/* User-controlled dark mode (via <html class="dark">) instead of media query.
+   Kept alongside the data-mode/data-theme attributes from tokens.css: existing
+   components still use Tailwind's dark: variant, so both mechanisms run in
+   parallel until components are migrated onto the token system directly. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  /* Accent — overridden inline in <body style="..."> from profile.accent. */
-  --accent: #a78bfa;
-  --accent-soft: #ede9fe;
-}
+  /* Bridge to tokens.css (src/tokens.css), which owns the actual color
+     values via [data-mode]/[data-theme] on <html>. Keeps --background/
+     --foreground working for any code still referencing the old names. */
+  --background: var(--bg);
+  --foreground: var(--text);
 
-.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --accent-soft: #2e1065;
+  /* @fontsource registers these under a "Variable" suffix; tokens.css itself
+     stays an unmodified copy of the design source, so the actual font-family
+     wiring lives here instead. */
+  --font-display: "Sora Variable", "Sora", system-ui, sans-serif;
+  --font-ui: "Inter Variable", "Inter", system-ui, sans-serif;
+  --font-rounded: "DM Sans Variable", "DM Sans", system-ui, sans-serif;
 }
 
 @theme inline {
@@ -22,7 +26,8 @@
   --color-foreground: var(--foreground);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-ui);
+  --font-display: var(--font-display);
   --font-mono: var(--font-geist-mono);
 }
 

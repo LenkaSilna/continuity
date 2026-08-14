@@ -132,7 +132,7 @@ export function CalendarDayPage() {
   if (!isValidDate) {
     return (
       <main className="flex min-h-screen items-center justify-center">
-        <p className="text-zinc-500">Not found</p>
+        <p className="text-(--text-muted)">Not found</p>
       </main>
     );
   }
@@ -160,7 +160,9 @@ export function CalendarDayPage() {
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-4 py-6 sm:px-6 sm:py-10">
         <header className="space-y-3">
           <BackLink fallback="/calendar" label={t.calendar.day.back} />
-          <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+          <h1 className="font-display text-xl font-semibold tracking-tight text-(--text)">
+            {title}
+          </h1>
           <CalendarHeader
             view="day"
             title=""

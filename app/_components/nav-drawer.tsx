@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n/client";
 import { supabase } from "@/lib/supabase/browser";
+import { Button } from "@/app/_components/button";
 import type { ModuleFlags } from "@/lib/types";
 
 const noop = () => () => {};
@@ -45,10 +46,10 @@ export function NavDrawer({ flags }: { flags: ModuleFlags }) {
   };
 
   const sectionClass =
-    "px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500";
+    "px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-(--text-muted)";
 
   const linkClass =
-    "flex min-h-[44px] items-center rounded-md px-3 text-sm text-zinc-900 transition hover:bg-zinc-100 dark:text-zinc-100 dark:hover:bg-zinc-900";
+    "flex min-h-[44px] items-center rounded-md px-3 text-sm text-(--text) transition-colors hover:bg-(--surface-2)";
 
   const drawerNode = (
     <>
@@ -56,7 +57,7 @@ export function NavDrawer({ flags }: { flags: ModuleFlags }) {
         onClick={close}
         aria-hidden
         className={[
-          "fixed inset-0 z-[100] bg-black/40 transition-opacity",
+          "fixed inset-0 z-[100] bg-(--overlay) transition-opacity",
           open ? "opacity-100" : "pointer-events-none opacity-0",
         ].join(" ")}
       />
@@ -66,19 +67,19 @@ export function NavDrawer({ flags }: { flags: ModuleFlags }) {
         aria-modal="true"
         aria-label={t.menu.open}
         className={[
-          "safe-top safe-bottom fixed right-0 top-0 z-[101] flex h-full w-72 max-w-[85vw] flex-col border-l border-zinc-200 bg-[var(--background)] text-zinc-900 shadow-xl transition-transform will-change-transform dark:border-zinc-800 dark:text-zinc-100",
+          "safe-top safe-bottom fixed right-0 top-0 z-[101] flex h-full w-72 max-w-[85vw] flex-col border-l border-(--border) bg-background text-(--text) shadow-(--cui-shadow-lg) transition-transform will-change-transform",
           open ? "translate-x-0" : "translate-x-full",
         ].join(" ")}
       >
         <div className="flex items-center justify-between px-3 py-2">
-          <span className="text-lg font-semibold tracking-tight">
+          <span className="font-display text-lg font-semibold tracking-tight text-(--text)">
             {t.common.appName}
           </span>
           <button
             type="button"
             aria-label={t.menu.close}
             onClick={close}
-            className="grid h-9 w-9 place-items-center rounded-md border border-zinc-300 text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+            className="grid h-9 w-9 place-items-center rounded-md border border-(--border) text-(--text-muted) transition-colors hover:bg-(--surface-2) hover:text-(--text)"
           >
             <svg
               viewBox="0 0 24 24"
@@ -151,13 +152,9 @@ export function NavDrawer({ flags }: { flags: ModuleFlags }) {
           </Link>
 
           <div className="mt-2 px-3">
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="inline-flex h-10 w-full items-center justify-center rounded-md border border-zinc-300 text-sm text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
-            >
+            <Button type="button" variant="ghost" size="sm" onClick={handleSignOut} className="w-full">
               {t.common.signOut}
-            </button>
+            </Button>
           </div>
         </nav>
       </aside>
@@ -171,7 +168,7 @@ export function NavDrawer({ flags }: { flags: ModuleFlags }) {
         aria-label={t.menu.open}
         aria-expanded={open}
         onClick={() => setOpen(true)}
-        className="grid h-9 w-9 place-items-center rounded-md border border-zinc-300 text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+        className="grid h-9 w-9 place-items-center rounded-md border border-(--border) text-(--text-muted) transition-colors hover:bg-(--surface-2) hover:text-(--text)"
       >
         <svg
           viewBox="0 0 24 24"

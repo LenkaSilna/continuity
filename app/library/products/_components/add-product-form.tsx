@@ -55,7 +55,7 @@ export function AddProductForm({
     <form
       ref={formRef}
       action={formAction}
-      className="space-y-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
+      className="space-y-3 rounded-(--cui-radius-xl) border border-(--border) bg-(--surface) p-4 shadow-(--cui-shadow-sm)"
     >
       <h3 className="text-sm font-semibold uppercase tracking-wide">
         {t.library.products.add}

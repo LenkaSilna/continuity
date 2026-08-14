@@ -1,3 +1,5 @@
+import { Button } from "./button";
+
 export function EditFormActions({
   isPending,
   isDeleting,
@@ -16,14 +18,10 @@ export function EditFormActions({
   deleteLabel: string;
 }) {
   return (
-    <div className="safe-bottom sticky bottom-0 -mx-4 flex items-center gap-2 border-t border-zinc-200 bg-(--background)/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 dark:border-zinc-800 ">
-      <button
-        type="submit"
-        disabled={isPending}
-        className="inline-flex h-11 flex-1 items-center justify-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-zinc-50 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-      >
+    <div className="safe-bottom sticky bottom-0 -mx-4 flex items-center gap-2 border-t border-(--border) bg-background/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
+      <Button type="submit" disabled={isPending} className="flex-1">
         {isPending ? savingLabel : saveLabel}
-      </button>
+      </Button>
       <button
         type="button"
         disabled={isDeleting}

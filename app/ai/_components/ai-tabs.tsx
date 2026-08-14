@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { AddDashedButton } from "@/app/_components/add-dashed-button";
+import { cardClass } from "@/app/_components/card";
 
 type PromptType = string;
 
@@ -34,17 +35,18 @@ export function AiTabs({ predefined, custom, labels }: Props) {
   return (
     <div className="space-y-4">
       {/* Tab bar */}
-      <div className="flex rounded-lg border border-zinc-200 p-1 dark:border-zinc-800">
+      <div className="flex gap-0.5 rounded-(--cui-radius-full) bg-(--surface-3) p-1">
         {(["predefined", "custom"] as const).map((t) => (
           <button
             key={t}
             type="button"
+            aria-selected={tab === t}
             onClick={() => setTab(t)}
             className={[
-              "flex-1 rounded-md py-2 text-sm font-medium transition",
+              "flex-1 rounded-(--cui-radius-full) py-2 text-sm transition-colors",
               tab === t
-                ? "bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900"
-                : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100",
+                ? "bg-(--surface) font-semibold text-(--text) shadow-(--cui-shadow-sm)"
+                : "font-medium text-(--text-muted) hover:text-(--text)",
             ].join(" ")}
           >
             {t === "predefined" ? labels.predefinedTab : labels.myTab}
@@ -60,15 +62,15 @@ export function AiTabs({ predefined, custom, labels }: Props) {
               <Link
                 to="/ai/$type"
                 params={{ type }}
-                className="flex items-start justify-between gap-3 rounded-lg border border-zinc-200 p-4 transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
+                className={cardClass("default", "flex items-start justify-between gap-3 hover:border-(--accent-border)")}
               >
                 <div className="min-w-0 space-y-1">
-                  <p className="font-medium">{title}</p>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  <p className="font-medium text-(--text)">{title}</p>
+                  <p className="text-sm text-(--text-muted)">
                     {desc}
                   </p>
                 </div>
-                <span aria-hidden className="shrink-0 text-zinc-400">
+                <span aria-hidden className="shrink-0 text-(--text-soft)">
                   →
                 </span>
               </Link>
@@ -84,7 +86,7 @@ export function AiTabs({ predefined, custom, labels }: Props) {
             + {labels.addNew}
           </AddDashedButton>
           {custom.length === 0 ? (
-            <p className="text-sm text-zinc-500">{labels.noCustom}</p>
+            <p className="text-sm text-(--text-muted)">{labels.noCustom}</p>
           ) : (
             <ul className="space-y-2">
               {custom.map((p) => (
@@ -92,17 +94,17 @@ export function AiTabs({ predefined, custom, labels }: Props) {
                   <Link
                     to="/ai/custom/$id"
                     params={{ id: p.id }}
-                    className="flex items-start justify-between gap-3 rounded-lg border border-zinc-200 p-4 transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
+                    className={cardClass("default", "flex items-start justify-between gap-3 hover:border-(--accent-border)")}
                   >
                     <div className="min-w-0 space-y-1">
-                      <p className="font-medium">{p.name}</p>
+                      <p className="font-medium text-(--text)">{p.name}</p>
                       {p.question && (
-                        <p className="truncate text-sm text-zinc-600 dark:text-zinc-400">
+                        <p className="truncate text-sm text-(--text-muted)">
                           {p.question}
                         </p>
                       )}
                     </div>
-                    <span aria-hidden className="shrink-0 text-zinc-400">
+                    <span aria-hidden className="shrink-0 text-(--text-soft)">
                       →
                     </span>
                   </Link>

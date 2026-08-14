@@ -8,7 +8,7 @@ export function BackToDashboard() {
     <Link
       to="/dashboard"
       aria-label={label}
-      className="-ml-3 mb-2 inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+      className="-ml-3 mb-2 inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm text-(--text-muted) transition-colors hover:bg-(--surface-2) hover:text-(--text)"
     >
       <svg
         viewBox="0 0 24 24"

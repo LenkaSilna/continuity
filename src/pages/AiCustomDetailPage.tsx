@@ -42,7 +42,7 @@ export function AiCustomDetailPage() {
   if (!isLoading && !data) {
     return (
       <main className="flex min-h-screen items-center justify-center">
-        <p className="text-zinc-500">Not found</p>
+        <p className="text-(--text-muted)">Not found</p>
       </main>
     );
   }
@@ -55,7 +55,7 @@ export function AiCustomDetailPage() {
           <div className="flex items-center justify-between">
             <Link
               to="/ai"
-              className="-ml-3 mb-2 inline-flex h-10 items-center gap-1 rounded-md px-3 text-sm text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+              className="-ml-3 mb-2 inline-flex h-10 items-center gap-1 rounded-md px-3 text-sm text-(--text-muted) transition-colors hover:bg-(--surface-2) hover:text-(--text)"
             >
               ← {t.ai.title}
             </Link>
@@ -91,19 +91,23 @@ export function AiCustomDetailPage() {
               <Link
                 to="/ai/custom/$id/edit"
                 params={{ id }}
-                className="inline-flex h-10 min-w-[44px] items-center gap-1.5 rounded-md border border-zinc-300 px-3 text-sm text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+                className="inline-flex h-10 min-w-[44px] items-center gap-1.5 rounded-md border border-(--border) px-3 text-sm text-(--text-muted) transition-colors hover:bg-(--surface-2) hover:text-(--text)"
               >
                 <PencilIcon />
                 <span className="hidden sm:inline">{t.ai.custom.editPrompt}</span>
               </Link>
             </div>
           </div>
-          {data && <h1 className="text-2xl font-semibold tracking-tight">{data.prompt.name}</h1>}
+          {data && (
+            <h1 className="font-display text-2xl font-semibold tracking-tight text-(--text)">
+              {data.prompt.name}
+            </h1>
+          )}
         </header>
 
         {isLoading && (
           <div className="flex items-center justify-center py-12">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-(--border) border-t-accent" />
           </div>
         )}
 

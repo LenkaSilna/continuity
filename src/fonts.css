@@ -1,3 +1,9 @@
+/* Design-system fonts (Sora/Inter/DM Sans) — self-hosted via @fontsource,
+   consistent with the offline-friendly PWA setup below. */
+@import "@fontsource-variable/sora";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/dm-sans";
+
 @font-face {
   font-family: "Geist";
   src: url("../node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2") format("woff2");

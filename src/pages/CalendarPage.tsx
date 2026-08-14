@@ -141,8 +141,10 @@ export function CalendarPage() {
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-5 px-4 py-6 sm:px-6 sm:py-10">
         <header className="space-y-2">
           <BackToDashboard />
-          <h1 className="text-2xl font-semibold tracking-tight">{t.calendar.title}</h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">{t.calendar.subtitle}</p>
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-(--text)">
+            {t.calendar.title}
+          </h1>
+          <p className="text-sm text-(--text-muted)">{t.calendar.subtitle}</p>
         </header>
 
         <CalendarHeader
@@ -189,7 +191,7 @@ export function CalendarPage() {
           />
         )}
 
-        <section className="space-y-1 text-xs text-zinc-500">
+        <section className="space-y-1 text-xs text-(--text-muted)">
           <p>● {t.calendar.cellLegend.mood}</p>
           <p>● {t.calendar.cellLegend.period}</p>
           <p>✓ {t.calendar.cellLegend.log}</p>

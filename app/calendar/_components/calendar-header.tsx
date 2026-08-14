@@ -31,7 +31,7 @@ export function CalendarHeader({
   onViewChange?: (view: CalendarView) => void;
 }) {
   const navBtn =
-    "inline-flex h-9 items-center rounded-md border border-zinc-300 px-3 text-sm text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900";
+    "inline-flex h-9 items-center rounded-md border border-(--border) px-3 text-sm text-(--text-muted) transition-colors hover:bg-(--surface-2) hover:text-(--text)";
 
   return (
     <div className="space-y-3">
@@ -71,8 +71,8 @@ export function CalendarHeader({
                 className={[
                   "rounded-md px-3 py-1.5 text-sm transition",
                   view === v
-                    ? "bg-zinc-900 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900"
-                    : "border border-zinc-300 text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900",
+                    ? "bg-accent text-(--on-accent)"
+                    : "border border-(--border) text-(--text-muted) hover:bg-(--surface-2) hover:text-(--text)",
                 ].join(" ")}
               >
                 {labels.views[v]}

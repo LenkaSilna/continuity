@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase/browser";
 import { DATA_BLOCKS, type DataBlock } from "@/lib/types";
+import { PERIOD_PRESETS, CUSTOM_PROMPT_DEFAULT_PERIOD_DAYS } from "@/lib/ai-prompts";
 
 export type CustomPromptActionState = {
   errorCode?: "name_required" | "not_found" | "generic";
@@ -12,6 +13,13 @@ function parseBlocks(formData: FormData): DataBlock[] {
   );
 }
 
+function parsePeriodDays(formData: FormData): number {
+  const raw = Number(formData.get("period_days"));
+  return (PERIOD_PRESETS as readonly number[]).includes(raw)
+    ? raw
+    : CUSTOM_PROMPT_DEFAULT_PERIOD_DAYS;
+}
+
 export async function createCustomPrompt(
   formData: FormData,
 ): Promise<CustomPromptActionState> {
@@ -20,13 +28,14 @@ export async function createCustomPrompt(
 
   const question = (formData.get("question") as string | null) ?? "";
   const data_blocks = parseBlocks(formData);
+  const period_days = parsePeriodDays(formData);
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { errorCode: "generic" };
 
   const { data, error } = await supabase
     .from("custom_prompts")
-    .insert({ user_id: user.id, name, question, data_blocks })
+    .insert({ user_id: user.id, name, question, data_blocks, period_days })
     .select("id")
     .single();
 
@@ -47,10 +56,11 @@ export async function updateCustomPrompt(
 
   const question = (formData.get("question") as string | null) ?? "";
   const data_blocks = parseBlocks(formData);
+  const period_days = parsePeriodDays(formData);
 
   const { error } = await supabase
     .from("custom_prompts")
-    .update({ name, question, data_blocks })
+    .update({ name, question, data_blocks, period_days })
     .eq("id", id);
 
   if (error) {

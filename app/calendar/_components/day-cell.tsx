@@ -29,7 +29,7 @@ export function DayCell({
 }) {
   const bg = moodColor(mood);
   // Mood pastel is mid-light → force dark text for readability in both themes.
-  const textOverride = bg ? "text-zinc-900" : "";
+  const textOverride = bg ? "text-black" : "";
 
   return (
     <Link
@@ -40,9 +40,9 @@ export function DayCell({
         "relative flex flex-col rounded-md border text-xs transition",
         size === "month" ? "min-h-[56px] p-1.5" : "min-h-[112px] p-2",
         muted
-          ? "border-zinc-100 text-zinc-400 dark:border-zinc-900 dark:text-zinc-600"
-          : "border-zinc-200 hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600",
-        isToday ? "ring-2 ring-zinc-900 dark:ring-zinc-100" : "",
+          ? "border-(--border) text-(--text-soft)"
+          : "border-(--border) hover:border-(--accent-border)",
+        isToday ? "ring-2 ring-accent" : "",
         textOverride,
       ].join(" ")}
       style={bg ? { backgroundColor: bg } : undefined}

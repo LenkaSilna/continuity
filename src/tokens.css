@@ -1,0 +1,143 @@
+:root {
+  /* ---- Fonts ----------------------------------------------------------- */
+  --font-display: "Sora", system-ui, sans-serif;   /* headings, numbers */
+  --font-ui:      "Inter", system-ui, sans-serif;  /* body, UI */
+  --font-rounded: "DM Sans", system-ui, sans-serif;/* friendly variants */
+
+  /* ---- Type scale (root = 16px) ----------------------------------------- */
+  --cui-text-xs:   0.75rem;   /* 12 */
+  --cui-text-sm:   0.8125rem; /* 13 */
+  --cui-text-base: 0.9375rem; /* 15 */
+  --cui-text-md:   1.0625rem; /* 17 */
+  --cui-text-lg:   1.375rem;  /* 22 */
+  --cui-text-xl:   1.75rem;   /* 28 */
+  --cui-text-2xl:  2.25rem;   /* 36 */
+  --cui-text-3xl:  3rem;      /* 48 */
+  --cui-text-4xl:  4.25rem;   /* 68 */
+
+  --cui-leading-tight:  1.12;
+  --cui-leading-snug:   1.32;
+  --cui-leading-normal: 1.55;
+  --cui-tracking-tight: -0.02em;
+  --cui-tracking-wide:  0.08em;
+
+  --w-regular:  400;
+  --w-medium:   500;
+  --w-semibold: 600;
+  --w-bold:     700;
+
+  /* ---- Spacing (4px base) ------------------------------------------------ */
+  --space-1: 4px;   --space-2: 8px;   --space-3: 12px;  --space-4: 16px;
+  --space-5: 20px;  --space-6: 24px;  --space-8: 32px;  --space-10: 40px;
+  --space-12: 48px; --space-16: 64px; --space-20: 80px; --space-24: 96px;
+
+  /* ---- Radius ------------------------------------------------------------ */
+  --cui-radius-xs:   8px;
+  --cui-radius-sm:   12px;
+  --cui-radius-md:   16px;
+  --cui-radius-lg:   20px;
+  --cui-radius-xl:   24px;
+  --cui-radius-2xl:  32px;
+  --cui-radius-full: 999px;
+
+  /* ---- Motion -------------------------------------------------------- */
+  --cui-ease:      cubic-bezier(0.4, 0, 0.2, 1);
+  --cui-ease-out:  cubic-bezier(0.16, 1, 0.3, 1);
+  --cui-dur-fast:  140ms;
+  --cui-dur:       220ms;
+  --cui-dur-slow:  380ms;
+
+  /* ---- Data visualization (constant across themes) --------------------- */
+  --viz-energy:    oklch(0.74 0.13 155);  /* energy — green */
+  --viz-stress:    oklch(0.78 0.13 62);   /* stress — apricot */
+  --viz-sleep:     oklch(0.63 0.14 285);  /* sleep — purple */
+  --viz-hydration: oklch(0.70 0.11 232);  /* hydration — blue */
+  --viz-protein:   oklch(0.72 0.14 35);   /* protein — coral */
+
+  /* cycle / phase */
+  --phase-menstrual:  oklch(0.66 0.16 18);
+  --phase-follicular: oklch(0.70 0.13 292);
+  --phase-ovulation:  oklch(0.73 0.12 205);
+  --phase-luteal:     oklch(0.74 0.12 152);
+
+  /* status semantics */
+  --ok:   oklch(0.70 0.13 155);
+  --warn: oklch(0.78 0.13 62);
+  --bad:  oklch(0.64 0.17 22);
+  --info: oklch(0.66 0.12 250);
+}
+
+/* ===========================================================================
+   ACCENT — hue and chroma per theme (data-theme)
+   =========================================================================== */
+[data-theme="lila"] { --accent-h: 286; --accent-c: 0.155; }
+[data-theme="pink"] { --accent-h: 356; --accent-c: 0.135; }
+[data-theme="mint"] { --accent-h: 166; --accent-c: 0.110; }
+
+/* ===========================================================================
+   LIGHT MODE
+   =========================================================================== */
+[data-mode="light"] {
+  --bg:          oklch(0.985 0.008 300);
+  --bg-grad-1:   oklch(0.955 0.022 322);
+  --bg-grad-2:   oklch(0.965 0.016 280);
+  --surface:     oklch(1 0 0);
+  --surface-2:   oklch(0.974 0.008 300);
+  --surface-3:   oklch(0.955 0.011 300);
+  --overlay:     oklch(0.30 0.04 290 / 0.42);
+
+  --border:        oklch(0.92 0.012 300);
+  --border-strong: oklch(0.86 0.016 300);
+
+  --text:       oklch(0.31 0.045 290);
+  --text-muted: oklch(0.52 0.035 290);
+  --text-soft:  oklch(0.64 0.025 290);
+  --on-accent:  oklch(0.99 0.005 300);
+
+  --accent:        oklch(0.605 var(--accent-c) var(--accent-h));
+  --accent-hover:  oklch(0.545 var(--accent-c) var(--accent-h));
+  --accent-pressed:oklch(0.48 var(--accent-c) var(--accent-h));
+  --accent-soft:   oklch(0.955 calc(var(--accent-c) * 0.32) var(--accent-h));
+  --accent-soft-2: oklch(0.91 calc(var(--accent-c) * 0.45) var(--accent-h));
+  --accent-border: oklch(0.86 calc(var(--accent-c) * 0.5) var(--accent-h));
+  --accent-text:   oklch(0.50 var(--accent-c) var(--accent-h));
+
+  --cui-shadow-sm: 0 1px 2px oklch(0.4 0.05 290 / 0.06), 0 1px 3px oklch(0.4 0.05 290 / 0.05);
+  --cui-shadow-md: 0 4px 14px oklch(0.4 0.05 290 / 0.08), 0 2px 4px oklch(0.4 0.05 290 / 0.05);
+  --cui-shadow-lg: 0 16px 40px oklch(0.4 0.05 290 / 0.12), 0 4px 10px oklch(0.4 0.05 290 / 0.05);
+  --cui-shadow-accent: 0 10px 26px oklch(0.6 0.16 var(--accent-h) / 0.30);
+}
+
+/* ===========================================================================
+   DARK MODE
+   =========================================================================== */
+[data-mode="dark"] {
+  --bg:          oklch(0.185 0.018 288);
+  --bg-grad-1:   oklch(0.255 0.034 300);
+  --bg-grad-2:   oklch(0.205 0.026 278);
+  --surface:     oklch(0.235 0.022 288);
+  --surface-2:   oklch(0.27 0.024 288);
+  --surface-3:   oklch(0.305 0.026 288);
+  --overlay:     oklch(0.12 0.02 288 / 0.62);
+
+  --border:        oklch(0.33 0.02 288);
+  --border-strong: oklch(0.42 0.024 288);
+
+  --text:       oklch(0.95 0.012 300);
+  --text-muted: oklch(0.74 0.022 290);
+  --text-soft:  oklch(0.60 0.022 290);
+  --on-accent:  oklch(0.99 0.005 300);
+
+  --accent:        oklch(0.70 var(--accent-c) var(--accent-h));
+  --accent-hover:  oklch(0.76 var(--accent-c) var(--accent-h));
+  --accent-pressed:oklch(0.65 var(--accent-c) var(--accent-h));
+  --accent-soft:   oklch(0.32 calc(var(--accent-c) * 0.55) var(--accent-h));
+  --accent-soft-2: oklch(0.38 calc(var(--accent-c) * 0.6) var(--accent-h));
+  --accent-border: oklch(0.43 calc(var(--accent-c) * 0.55) var(--accent-h));
+  --accent-text:   oklch(0.80 var(--accent-c) var(--accent-h));
+
+  --cui-shadow-sm: 0 1px 2px oklch(0 0 0 / 0.30);
+  --cui-shadow-md: 0 4px 14px oklch(0 0 0 / 0.36);
+  --cui-shadow-lg: 0 16px 40px oklch(0 0 0 / 0.46);
+  --cui-shadow-accent: 0 10px 26px oklch(0.5 0.16 var(--accent-h) / 0.42);
+}

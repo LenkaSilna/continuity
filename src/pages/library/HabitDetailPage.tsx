@@ -31,7 +31,7 @@ export function HabitDetailPage() {
   if (!isLoading && !habit) {
     return (
       <main className="flex min-h-screen items-center justify-center">
-        <p className="text-zinc-500">Not found</p>
+        <p className="text-(--text-muted)">Not found</p>
       </main>
     );
   }
@@ -43,18 +43,18 @@ export function HabitDetailPage() {
         <header>
           <Link
             to="/library/habits"
-            className="-ml-3 mb-2 inline-flex h-10 items-center gap-1 rounded-md px-3 text-sm text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+            className="-ml-3 mb-2 inline-flex h-10 items-center gap-1 rounded-md px-3 text-sm text-(--text-muted) transition-colors hover:bg-(--surface-2) hover:text-(--text)"
           >
             ← {t.library.habits.back}
           </Link>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-(--text)">
             {t.library.habits.edit}
           </h1>
         </header>
 
         {isLoading && (
           <div className="flex items-center justify-center py-12">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-(--border) border-t-accent" />
           </div>
         )}
 

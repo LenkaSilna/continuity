@@ -1,4 +1,4 @@
-import { isAccent, isTheme, accentVars } from "./theme";
+import { isAccent, isTheme, dataThemeFor } from "./theme";
 import type { Accent, ThemeMode } from "./types";
 
 export const THEME_KEY = "app_theme";
@@ -26,10 +26,10 @@ export function applyAppearance(patch: { theme?: ThemeMode; accent?: Accent }): 
   if (patch.theme) localStorage.setItem(THEME_KEY, theme);
   if (patch.accent) localStorage.setItem(ACCENT_KEY, accent);
 
-  const vars = accentVars(accent, theme);
   const el = document.documentElement;
+  // .dark class stays for Tailwind's dark: variant (still used throughout
+  // existing components); data-mode/data-theme drive tokens.css.
   el.classList.toggle("dark", theme === "dark");
-  el.style.setProperty("--background", vars.background);
-  el.style.setProperty("--accent", vars.accent);
-  el.style.setProperty("--accent-soft", vars.accentSoft);
+  el.setAttribute("data-mode", theme);
+  el.setAttribute("data-theme", dataThemeFor(accent));
 }

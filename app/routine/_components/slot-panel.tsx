@@ -181,9 +181,9 @@ export function SlotPanel({
     }, [pickerOpen]);
 
     return (
-      <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+      <section className="rounded-(--cui-radius-xl) border border-(--border) bg-(--surface) p-4 shadow-(--cui-shadow-sm)">
         <header className="mb-3 flex items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-(--text-muted)">
             {t.routine.sections[sectionKey]}
           </h2>
           {!libraryEmpty && (
@@ -191,10 +191,10 @@ export function SlotPanel({
               type="button"
               onClick={() => setPickerOpen((v) => !v)}
               className={[
-                "rounded-md border px-2 py-1 text-xs transition",
+                "rounded-md border px-2 py-1 text-xs transition-colors",
                 pickerOpen
-                  ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
-                  : "border-zinc-300 text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900",
+                  ? "border-transparent bg-accent text-(--on-accent)"
+                  : "border-(--border) text-(--text-muted) hover:bg-(--surface-2) hover:text-(--text)",
               ].join(" ")}
             >
               {t.routine.add[sectionKey]}
@@ -203,28 +203,28 @@ export function SlotPanel({
         </header>
 
         {libraryEmpty ? (
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-(--text-muted)">
             {t.routine.libraryEmpty[sectionKey]}{" "}
             <Link
               to={`/library/${sectionKey}`}
-              className="underline underline-offset-2 hover:text-zinc-700 dark:hover:text-zinc-300"
+              className="underline underline-offset-2 hover:text-(--text)"
             >
               {t.routine.libraryEmptyLink}
             </Link>
           </p>
         ) : rows.length === 0 ? (
-          <p className="text-xs text-zinc-500">{t.routine.empty[sectionKey]}</p>
+          <p className="text-xs text-(--text-muted)">{t.routine.empty[sectionKey]}</p>
         ) : (
           <ul className="space-y-1.5">
             {rows.map((row) => (
               <li
                 key={row.routineId}
-                className="flex items-center justify-between gap-2 rounded-md bg-zinc-50 px-3 py-2 dark:bg-zinc-900"
+                className="flex items-center justify-between gap-2 rounded-md bg-(--surface-2) px-3 py-2"
               >
                 <div className="min-w-0">
                   <span className="text-sm font-medium">{row.label}</span>
                   {row.sub && (
-                    <span className="ml-2 text-xs text-zinc-500">
+                    <span className="ml-2 text-xs text-(--text-muted)">
                       {row.sub}
                     </span>
                   )}
@@ -250,7 +250,7 @@ export function SlotPanel({
                         }),
                     })
                   }
-                  className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-zinc-300 text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-900"
+                  className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-(--border) text-(--text-muted) transition-colors hover:bg-(--surface-2) hover:text-(--text) disabled:opacity-50"
                 >
                   <TrashIcon />
                 </button>
@@ -260,21 +260,21 @@ export function SlotPanel({
         )}
 
         {pickerOpen && !libraryEmpty && (
-          <div ref={pickerRef} className="mt-3 rounded-md border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950">
+          <div ref={pickerRef} className="mt-3 rounded-md border border-(--border) bg-(--surface) p-3">
             <div className="mb-2 flex items-center justify-between gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+              <span className="text-xs font-semibold uppercase tracking-wide text-(--text-muted)">
                 {t.routine.picker.title}
               </span>
               <button
                 type="button"
                 onClick={() => setPickerOpen(false)}
-                className="rounded px-2 py-0.5 text-xs text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                className="rounded px-2 py-0.5 text-xs text-(--text-muted) transition-colors hover:bg-(--surface-2)"
               >
                 {t.routine.picker.cancel}
               </button>
             </div>
             {available.length === 0 ? (
-              <p className="py-1 text-xs text-zinc-500">
+              <p className="py-1 text-xs text-(--text-muted)">
                 {t.routine.picker.allAdded}
               </p>
             ) : (
@@ -292,11 +292,11 @@ export function SlotPanel({
                           setPickerOpen(false);
                         })
                       }
-                      className="flex w-full items-baseline justify-between gap-2 rounded-md px-2 py-2 text-left text-sm hover:bg-zinc-100 disabled:opacity-50 dark:hover:bg-zinc-900"
+                      className="flex w-full items-baseline justify-between gap-2 rounded-md px-2 py-2 text-left text-sm transition-colors hover:bg-(--surface-2) disabled:opacity-50"
                     >
                       <span className="truncate">{item.label}</span>
                       {item.sub && (
-                        <span className="shrink-0 text-xs text-zinc-500">
+                        <span className="shrink-0 text-xs text-(--text-muted)">
                           {item.sub}
                         </span>
                       )}

@@ -58,8 +58,8 @@ export function PeriodPicker({
   };
 
   return (
-    <section className="space-y-2 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
+    <section className="space-y-2 rounded-(--cui-radius-xl) border border-(--border) bg-(--surface) p-4 shadow-(--cui-shadow-sm)">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-(--text-muted)">
         {t.calendar.day.period.title}
       </h2>
       <div className="flex flex-wrap gap-2">
@@ -75,8 +75,8 @@ export function PeriodPicker({
               className={[
                 "inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm transition disabled:opacity-50",
                 active
-                  ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
-                  : "border-zinc-300 text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900",
+                  ? "border-transparent bg-accent text-(--on-accent)"
+                  : "border-(--border) text-(--text-muted) hover:bg-(--surface-2) hover:text-(--text)",
               ].join(" ")}
             >
               {value ? (

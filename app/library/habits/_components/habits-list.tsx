@@ -22,12 +22,12 @@ export function HabitsList({ habits }: { habits: Habit[] }) {
       {habits.map((h) => (
         <li
           key={h.id}
-          className="flex items-start justify-between gap-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
+          className="flex items-start justify-between gap-3 rounded-(--cui-radius-xl) border border-(--border) bg-(--surface) p-4 shadow-(--cui-shadow-sm)"
         >
           <div className="min-w-0 flex-1 space-y-1">
             <span className="font-medium">{h.name}</span>
             {h.description && (
-              <p className="whitespace-pre-wrap text-xs text-zinc-600 dark:text-zinc-400">
+              <p className="whitespace-pre-wrap text-xs text-(--text-muted)">
                 {h.description}
               </p>
             )}

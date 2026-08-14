@@ -19,7 +19,7 @@ export function ListItemActions({
       <Link
         to={editHref}
         aria-label={editAriaLabel}
-        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-zinc-300 text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-(--border) text-(--text-muted) transition-colors hover:bg-(--surface-2) hover:text-(--text)"
       >
         <PencilIcon />
       </Link>
@@ -28,7 +28,7 @@ export function ListItemActions({
         aria-label={deleteAriaLabel}
         disabled={isDeleting}
         onClick={onDelete}
-        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-zinc-300 text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-900"
+        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-(--border) text-(--text-muted) transition-colors hover:bg-(--surface-2) hover:text-(--text) disabled:opacity-50"
       >
         <TrashIcon />
       </button>

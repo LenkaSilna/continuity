@@ -2,6 +2,7 @@ import { useState, useTransition } from "react";
 import { useI18n } from "@/lib/i18n/client";
 import { showError, showSuccess } from "@/lib/toast";
 import { savePromptOverride, deletePromptOverride } from "../_actions";
+import { Button } from "@/app/_components/button";
 
 type Props = {
   initialText: string;
@@ -117,58 +118,63 @@ export function PromptEditor({
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-zinc-500">{t.ai.detail.hint}</p>
+      <p className="text-xs text-(--text-muted)">{t.ai.detail.hint}</p>
       <textarea
         data-prompt
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={24}
-        className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 font-mono text-xs leading-relaxed dark:border-zinc-700 dark:bg-zinc-900"
+        className="w-full rounded-md border border-(--border) bg-(--surface) px-3 py-2 font-mono text-xs leading-relaxed text-(--text)"
       />
 
-      <div className="safe-bottom sticky bottom-0 -mx-4 flex flex-col gap-2 border-t border-zinc-200 bg-[var(--background)]/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 dark:border-zinc-800 ">
+      <div className="safe-bottom sticky bottom-0 -mx-4 flex flex-col gap-2 border-t border-(--border) bg-background/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
         <div className="flex gap-2">
-          <button
+          <Button
             type="button"
             onClick={onCopy}
             aria-label={copiedAt ? t.ai.detail.copied : t.ai.detail.copy}
-            className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-md bg-zinc-900 px-4 text-sm font-medium text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900"
+            className="flex-1"
           >
             {copiedAt ? checkIcon : copyIcon}
             {copiedAt ? t.ai.detail.copied : t.ai.detail.copy}
-          </button>
+          </Button>
           {promptType && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={handleRegenerate}
               disabled={isRegen}
               aria-label={t.ai.detail.regenerate}
-              className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-md border border-zinc-300 px-4 text-sm text-zinc-700 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+              className="flex-1"
             >
               <span className={isRegen ? "animate-spin" : ""}>{regenIcon}</span>
               {isRegen ? t.common.loading : t.ai.detail.regenerate}
-            </button>
+            </Button>
           )}
         </div>
         {promptType && (
           <div className="flex gap-2">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={onSave}
               disabled={isSaving || text === initialText}
-              className="inline-flex h-10 flex-1 items-center justify-center rounded-md border border-zinc-300 px-3 text-sm text-zinc-700 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+              className="flex-1"
             >
               {isSaving ? t.common.saving : t.ai.detail.save}
-            </button>
+            </Button>
             {hasOverride && (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={onRestore}
                 disabled={isRestoring}
-                className="inline-flex h-10 flex-1 items-center justify-center rounded-md border border-zinc-300 px-3 text-sm text-zinc-500 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-900"
+                className="flex-1"
               >
                 {isRestoring ? t.common.loading : t.ai.detail.restore}
-              </button>
+              </Button>
             )}
           </div>
         )}

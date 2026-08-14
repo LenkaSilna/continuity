@@ -7,6 +7,8 @@ import { PROMPT_TYPES } from "@/lib/ai-prompts";
 import { toISODate } from "@/lib/calendar";
 import { TopNav } from "@/app/_components/top-nav";
 import { PencilIcon } from "@/app/_components/icons";
+import { Card, cardClass } from "@/app/_components/card";
+import { buttonClass } from "@/app/_components/button";
 import type { CycleIntensity, ItemKind, Profile } from "@/lib/types";
 
 const intensityDot: Record<CycleIntensity, string> = {
@@ -93,7 +95,7 @@ export function DashboardPage() {
     navigate({ to: "/profile" });
     return (
       <main className="flex min-h-screen items-center justify-center">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-700 dark:border-t-zinc-100" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-(--border) border-t-accent" />
       </main>
     );
   }
@@ -116,8 +118,10 @@ export function DashboardPage() {
       <TopNav />
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 sm:py-12">
         <header className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{t.dashboard.title}</h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-(--text)">
+            {t.dashboard.title}
+          </h1>
+          <p className="text-sm text-(--text-muted)">
             {t.common.signedInAs} <strong>{user?.email}</strong>
           </p>
         </header>
@@ -139,44 +143,44 @@ export function DashboardPage() {
           </section>
         ) : p ? (
           <>
-            <section className="flex items-center justify-between gap-3 rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
+            <Card className="flex items-center justify-between gap-3">
               <div className="min-w-0 space-y-1">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-(--text-muted)">
                   {t.dashboard.aboutMe}
                 </h2>
-                <p className="truncate text-lg font-medium">
-                  {p.name || <span className="text-zinc-400">{t.dashboard.empty}</span>}
+                <p className="truncate text-lg font-medium text-(--text)">
+                  {p.name || <span className="text-(--text-soft)">{t.dashboard.empty}</span>}
                 </p>
               </div>
               <Link
                 to="/profile"
                 aria-label={t.common.edit}
-                className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-2 rounded-md border border-zinc-300 px-3 text-sm text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                className={buttonClass("ghost", "sm", "min-h-[44px] min-w-[44px] shrink-0")}
               >
                 <PencilIcon />
                 <span className="hidden sm:inline">{t.common.edit}</span>
               </Link>
-            </section>
+            </Card>
 
             {hasAnySummaryModule && todayStats && (
               <Link
                 to="/calendar/$date"
                 params={{ date: todayISO }}
-                className="block rounded-lg border border-zinc-200 p-5 transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
+                className={cardClass("default", "block hover:border-(--accent-border)")}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 space-y-1">
-                    <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
+                    <h2 className="text-sm font-semibold uppercase tracking-wide text-(--text-muted)">
                       {t.today.title}
                     </h2>
-                    <p className="text-lg font-medium">{todayTitleCapitalised}</p>
+                    <p className="text-lg font-medium text-(--text)">{todayTitleCapitalised}</p>
                   </div>
-                  <span aria-hidden className="shrink-0 text-zinc-400">→</span>
+                  <span aria-hidden className="shrink-0 text-(--text-soft)">→</span>
                 </div>
                 <dl className="mt-4 grid grid-cols-3 gap-3 text-sm">
                   {p.module_journal && (
                     <div className="space-y-1">
-                      <dt className="text-xs uppercase tracking-wide text-zinc-500">
+                      <dt className="text-xs uppercase tracking-wide text-(--text-muted)">
                         {t.calendar.day.mood.title}
                       </dt>
                       <dd className="flex items-center gap-2">
@@ -184,23 +188,23 @@ export function DashboardPage() {
                           <>
                             <span
                               aria-hidden
-                              className="inline-block h-3 w-3 rounded-full border border-zinc-300 dark:border-zinc-700"
+                              className="inline-block h-3 w-3 rounded-full border border-(--border)"
                               style={{ backgroundColor: moodHue(todayStats.todayMood) }}
                             />
                             <span className="font-medium">
                               {todayStats.todayMood}
-                              <span className="text-xs text-zinc-500">/5</span>
+                              <span className="text-xs text-(--text-muted)">/5</span>
                             </span>
                           </>
                         ) : (
-                          <span className="text-zinc-400">—</span>
+                          <span className="text-(--text-soft)">—</span>
                         )}
                       </dd>
                     </div>
                   )}
                   {p.module_cycle && (
                     <div className="space-y-1">
-                      <dt className="text-xs uppercase tracking-wide text-zinc-500">
+                      <dt className="text-xs uppercase tracking-wide text-(--text-muted)">
                         {t.calendar.day.period.title}
                       </dt>
                       <dd className="flex items-center gap-2">
@@ -215,24 +219,24 @@ export function DashboardPage() {
                             </span>
                           </>
                         ) : (
-                          <span className="text-zinc-400">{t.calendar.day.period.none}</span>
+                          <span className="text-(--text-soft)">{t.calendar.day.period.none}</span>
                         )}
                       </dd>
                     </div>
                   )}
                   {p.module_routine && (
                     <div className="space-y-1">
-                      <dt className="text-xs uppercase tracking-wide text-zinc-500">
+                      <dt className="text-xs uppercase tracking-wide text-(--text-muted)">
                         {t.calendar.day.routine.title}
                       </dt>
                       <dd>
                         {todayStats.routineTotal > 0 ? (
                           <span className="font-medium">
                             {todayStats.routineDone}
-                            <span className="text-xs text-zinc-500"> / {todayStats.routineTotal}</span>
+                            <span className="text-xs text-(--text-muted)"> / {todayStats.routineTotal}</span>
                           </span>
                         ) : (
-                          <span className="text-zinc-400">—</span>
+                          <span className="text-(--text-soft)">—</span>
                         )}
                       </dd>
                     </div>
@@ -244,10 +248,10 @@ export function DashboardPage() {
             {p.module_ai && (
               <section className="space-y-3">
                 <div className="space-y-0.5">
-                  <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-(--text-muted)">
                     {t.ai.dashboardTitle}
                   </h2>
-                  <p className="text-xs text-zinc-500">{t.ai.dashboardHint}</p>
+                  <p className="text-xs text-(--text-muted)">{t.ai.dashboardHint}</p>
                 </div>
                 <ul className="space-y-2">
                   {PROMPT_TYPES.map((type) => (
@@ -255,13 +259,13 @@ export function DashboardPage() {
                       <Link
                         to="/ai/$type"
                         params={{ type }}
-                        className="flex items-start justify-between gap-3 rounded-lg border border-zinc-200 p-4 transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
+                        className={cardClass("default", "flex items-start justify-between gap-3 hover:border-(--accent-border)")}
                       >
                         <div className="min-w-0 space-y-0.5">
-                          <p className="text-sm font-medium">{t.ai.types[type].title}</p>
-                          <p className="text-xs text-zinc-500">{t.ai.types[type].desc}</p>
+                          <p className="text-sm font-medium text-(--text)">{t.ai.types[type].title}</p>
+                          <p className="text-xs text-(--text-muted)">{t.ai.types[type].desc}</p>
                         </div>
-                        <span aria-hidden className="shrink-0 text-zinc-400">→</span>
+                        <span aria-hidden className="shrink-0 text-(--text-soft)">→</span>
                       </Link>
                     </li>
                   ))}

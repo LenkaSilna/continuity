@@ -1,9 +1,12 @@
 import { useState, useTransition } from "react";
 import { DATA_BLOCKS, type DataBlock } from "@/lib/types";
+import { CUSTOM_PROMPT_DEFAULT_PERIOD_DAYS, type PeriodDays } from "@/lib/ai-prompts";
 import { useI18n } from "@/lib/i18n/client";
 import { confirmToast } from "@/lib/confirm-toast";
 import { showError, showSuccess } from "@/lib/toast";
 import { ToggleChip } from "@/app/_components/toggle-chip";
+import { PeriodSelect } from "@/app/_components/period-select";
+import { Button } from "@/app/_components/button";
 import type { CustomPromptActionState } from "../_actions";
 
 type Props = {
@@ -12,6 +15,7 @@ type Props = {
   initialName?: string;
   initialQuestion?: string;
   initialBlocks?: DataBlock[];
+  initialPeriodDays?: number;
   onDelete?: () => Promise<{ errorCode?: string } | void>;
 };
 
@@ -21,6 +25,7 @@ export function CustomPromptForm({
   initialName = "",
   initialQuestion = "",
   initialBlocks = [],
+  initialPeriodDays = CUSTOM_PROMPT_DEFAULT_PERIOD_DAYS,
   onDelete,
 }: Props) {
   const { t } = useI18n();
@@ -31,6 +36,9 @@ export function CustomPromptForm({
   );
   const [name, setName] = useState(initialName);
   const [question, setQuestion] = useState(initialQuestion);
+  const [periodDays, setPeriodDays] = useState<PeriodDays>(
+    initialPeriodDays as PeriodDays,
+  );
 
   const toggleBlock = (block: DataBlock) => {
     setSelected((prev) => {
@@ -71,7 +79,7 @@ export function CustomPromptForm({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={t.ai.custom.namePlaceholder}
-          className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          className="w-full rounded-md border border-(--border) bg-(--surface) px-3 py-2 text-sm text-(--text)"
         />
       </div>
 
@@ -95,6 +103,10 @@ export function CustomPromptForm({
         <input key={block} type="hidden" name="data_blocks" value={block} />
       ))}
 
+      {/* Period */}
+      <PeriodSelect value={periodDays} onChange={setPeriodDays} />
+      <input type="hidden" name="period_days" value={periodDays} />
+
       {/* Question */}
       <div className="space-y-1">
         <label className="block text-xs font-medium">
@@ -106,18 +118,14 @@ export function CustomPromptForm({
           onChange={(e) => setQuestion(e.target.value)}
           placeholder={t.ai.custom.questionPlaceholder}
           rows={6}
-          className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm leading-relaxed dark:border-zinc-700 dark:bg-zinc-900"
+          className="w-full rounded-md border border-(--border) bg-(--surface) px-3 py-2 text-sm leading-relaxed text-(--text)"
         />
       </div>
 
-      <div className="safe-bottom sticky bottom-0 -mx-4 flex items-center gap-2 border-t border-zinc-200 bg-(--background)/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 dark:border-zinc-800 ">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="inline-flex h-11 flex-1 items-center justify-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-zinc-50 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-        >
+      <div className="safe-bottom sticky bottom-0 -mx-4 flex items-center gap-2 border-t border-(--border) bg-background/90 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
+        <Button type="submit" disabled={isPending} className="flex-1">
           {isPending ? t.common.saving : t.ai.custom.save}
-        </button>
+        </Button>
         {onDelete && (
           <button
             type="button"

@@ -83,9 +83,9 @@ export function EditObservationForm({
           type="color"
           name="color"
           defaultValue={tag.color ?? "#a78bfa"}
-          className="h-9 w-12 cursor-pointer rounded-md border border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-900"
+          className="h-9 w-12 cursor-pointer rounded-md border border-(--border) bg-(--surface)"
         />
-        <span className="text-xs text-zinc-500">
+        <span className="text-xs text-(--text-muted)">
           {t.library.observations.form.colorHint}
         </span>
       </label>
